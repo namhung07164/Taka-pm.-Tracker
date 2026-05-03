@@ -1,0 +1,46 @@
+[
+  {
+    "__id": "31b98951-989e-46d7-b854-581797a6d494",
+    "parentTaskId": "92570a25-c727-4474-bc7d-baf25de0a521",
+    "projectCode": "HRESG",
+    "updatedAt": "2026-04-27T12:38:51.986Z",
+    "id": "31b98951-989e-46d7-b854-581797a6d494",
+    "subTasks": [
+      {
+        "id": "ce32d4d3-03b4-4dc7-92c7-1047d6da6dcd",
+        "updatedAt": "2026-04-27T12:38:51.986Z",
+        "delegationStatus": "Assigned",
+        "comments": "mmmmmmmmmmmmm",
+        "name": "",
+        "finishAct": "2026-05-07T22:00",
+        "status": "Assigned",
+        "priority": "Mid",
+        "startAct": "2026-04-27T22:00",
+        "party": "HR-BEN"
+      }
+    ],
+    "name": "Planning"
+  },
+  {
+    "__id": "e1a1b3fa-f374-4198-ade7-aec250c2a72c",
+    "projectCode": "HRESG",
+    "parentTaskId": "9f0f19f9-e050-4241-9b5b-1dc3a1b813ea",
+    "name": "Negotiation",
+    "id": "e1a1b3fa-f374-4198-ade7-aec250c2a72c",
+    "subTasks": [
+      {
+        "id": "20e29ae9-0234-43ba-90d3-7a671e086baf",
+        "delegationStatus": "Assigned",
+        "updatedAt": "2026-04-27T11:43:47.108Z",
+        "comments": "nmnmnnnnnnn",
+        "name": "",
+        "status": "Assigned",
+        "priority": "Mid",
+        "startAct": "2026-04-27T22:00",
+        "party": "HR-NHU",
+        "finishAct": "2026-05-02T22:00"
+      }
+    ],
+    "updatedAt": "2026-04-27T11:43:47.109Z"
+  }
+]

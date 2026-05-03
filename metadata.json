@@ -1,0 +1,5 @@
+{
+  "name": "Takashimaya Task Tracker",
+  "description": "A specialized task status tracking app for Takashimaya PM, featuring automated status updates based on start, finish, and site-update dates.",
+  "requestFramePermissions": []
+}

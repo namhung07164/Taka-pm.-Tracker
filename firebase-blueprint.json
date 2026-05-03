@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A project task synced from the master app",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "description": "Unique task code" },
+        "location": { "type": "string", "description": "Physical location of the task" },
+        "parentTask": { "type": "string", "description": "Name of the parent project/task" },
+        "name": { "type": "string", "description": "Name of the task" },
+        "startDate": { "type": "string", "format": "date", "description": "Scheduled start date" },
+        "finishDate": { "type": "string", "format": "date", "description": "Scheduled finish date" },
+        "siteUpdateDate": { "type": "string", "format": "date", "description": "Actual site update date" },
+        "report": { "type": "string", "description": "Task progress report" },
+        "startDateRequest": { "$ref": "DateRequest" },
+        "finishDateRequest": { "$ref": "DateRequest" },
+        "uid": { "type": "string", "description": "User ID who owns/created the task" }
+      },
+      "required": ["code", "location", "name", "startDate", "finishDate", "uid"]
+    },
+    "DateRequest": {
+      "title": "DateRequest",
+      "description": "A request to change a task date",
+      "type": "object",
+      "properties": {
+        "requestedDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["Holding", "Approved", "Rejected"] }
+      },
+      "required": ["requestedDate", "status"]
+    },
+    "CloudData": {
+      "title": "CloudData",
+      "description": "Master data stored in the cloud for lookup",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "parentTask": { "type": "string" },
+        "location": { "type": "string" },
+        "name": { "type": "string" },
+        "startDate": { "type": "string" },
+        "finishDate": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User specific tasks"
+    },
+    "/cloudData/{code}": {
+      "schema": "CloudData",
+      "description": "Master cloud data for lookup"
+    }
+  }
+}

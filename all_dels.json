@@ -1,0 +1,147 @@
+[
+  {
+    "__id": "08d17629-8662-48d4-974d-03bf126de592",
+    "name": "Negotiation",
+    "projectCode": "HRESG",
+    "createdBy": "a85a95d9-640c-4c4c-b652-959fb133a452",
+    "id": "08d17629-8662-48d4-974d-03bf126de592",
+    "subTasks": [
+      {
+        "delegationStatus": "Assigned",
+        "updatedAt": "2026-04-29T17:16:10.248Z",
+        "name": "Dhsdhsh",
+        "priority": "High",
+        "finishAct": "2026-05-02T22:00",
+        "id": "45ab4632-1bdb-43f1-83ab-ced7597caa64",
+        "party": "Hr-Ben",
+        "status": "Assigned",
+        "startAct": "2026-04-06",
+        "comments": ""
+      }
+    ],
+    "updatedAt": "2026-04-29T17:16:10.248Z",
+    "parentTaskId": "9f0f19f9-e050-4241-9b5b-1dc3a1b813ea"
+  },
+  {
+    "__id": "71c88bce-2a6d-419b-87f9-809c3c566348",
+    "createdBy": "a85a95d9-640c-4c4c-b652-959fb133a452",
+    "projectCode": "HRESG",
+    "name": "ESG",
+    "updatedAt": "2026-04-29T16:31:44.606Z",
+    "parentTaskId": "HRESG",
+    "id": "71c88bce-2a6d-419b-87f9-809c3c566348",
+    "subTasks": [
+      {
+        "startAct": "2026-04-27T22:00",
+        "id": "5a20a964-bd80-4ae6-873d-db965110af94",
+        "party": "HR-NHU",
+        "finishAct": "2026-05-07T22:00",
+        "approvalStatus": "Rejected",
+        "name": "Test bbb",
+        "priority": "High",
+        "report": "",
+        "siteUpdateDate": "2026-04-29",
+        "status": "Rejected",
+        "comments": "",
+        "actionRequest": {
+          "timestamp": "2026-04-29T10:00:13.969Z",
+          "status": "Holding",
+          "type": "Completed"
+        },
+        "updatedAt": "2026-04-29T16:31:44.606Z",
+        "delegationStatus": "Rejected"
+      }
+    ]
+  },
+  {
+    "__id": "860c3698-2e8e-42cf-8b02-f40ee77b7b3f",
+    "subTasks": [
+      {
+        "finishAct": "2026-04-30T10:00",
+        "priority": "Mid",
+        "name": "Test1",
+        "startAct": "2026-04-23T10:00",
+        "comments": "",
+        "status": "Assigned",
+        "party": "CP01",
+        "id": "7b83a60e-add1-4283-9f02-e0a0f9971221",
+        "delegationStatus": "Assigned",
+        "updatedAt": "2026-05-02T14:56:33.953Z"
+      },
+      {
+        "name": "Test2",
+        "priority": "Mid",
+        "finishAct": "2026-04-30T10:00",
+        "id": "c0bdb32d-fe96-4cef-a5b7-dabbca5c4136",
+        "party": "CP01",
+        "status": "Assigned",
+        "startAct": "2026-04-23T10:00",
+        "comments": "",
+        "delegationStatus": "Assigned",
+        "updatedAt": "2026-05-02T14:56:30.042Z"
+      }
+    ],
+    "id": "860c3698-2e8e-42cf-8b02-f40ee77b7b3f",
+    "updatedAt": "2026-05-02T14:56:33.953Z",
+    "parentTaskId": "d630fcb6-7f0c-4bb6-921a-31f1aa7c3546",
+    "name": "MD drawing check",
+    "createdBy": "5e558844-bfcf-4c04-9b15-faad7165a398",
+    "projectCode": "L1-105"
+  },
+  {
+    "__id": "98e87751-dce1-44e3-896a-57b2974f9805",
+    "name": "Cp daily task",
+    "createdBy": "admin",
+    "projectCode": "Cp daily",
+    "subTasks": [
+      {
+        "name": "Md drawing check",
+        "priority": "Mid",
+        "finishAct": "2026-12-31T22:00",
+        "party": "Cp01",
+        "id": "64552a23-e097-4eb1-9e9b-1f3db7a7c25d",
+        "comments": "Need md team to check and reply",
+        "startAct": "2026-04-14T22:00",
+        "status": "Assigned",
+        "delegationStatus": "Assigned",
+        "updatedAt": "2026-05-02T14:49:40.663Z"
+      }
+    ],
+    "id": "98e87751-dce1-44e3-896a-57b2974f9805",
+    "updatedAt": "2026-05-02T14:49:40.663Z",
+    "parentTaskId": "Cp daily"
+  },
+  {
+    "__id": "ae0bc14b-adc6-4df8-9f63-e00be9814802",
+    "name": "Planning",
+    "createdBy": "a85a95d9-640c-4c4c-b652-959fb133a452",
+    "projectCode": "HRESG",
+    "id": "ae0bc14b-adc6-4df8-9f63-e00be9814802",
+    "subTasks": [
+      {
+        "updatedAt": "2026-04-30T04:48:58.807Z",
+        "report": "bbbbbbb",
+        "siteUpdateDate": "2026-04-29",
+        "delegationStatus": "In Progress",
+        "status": "Assigned",
+        "comments": "dèhhh",
+        "startAct": "2026-04-27T22:00",
+        "id": "0a8648ad-c8f9-4220-8249-c167c3833191",
+        "party": "HR-NHU",
+        "finishAct": "2026-05-07T22:00",
+        "priority": "Mid-high",
+        "name": "Test"
+      }
+    ],
+    "updatedAt": "2026-04-30T04:48:58.807Z",
+    "parentTaskId": "92570a25-c727-4474-bc7d-baf25de0a521"
+  },
+  {
+    "__id": "ec67de90-2cbe-429d-b483-8f6fda67aa08",
+    "name": "Test CP",
+    "createdBy": "admin",
+    "subTasks": [],
+    "id": "ec67de90-2cbe-429d-b483-8f6fda67aa08",
+    "updatedAt": "2026-04-29T15:37:00.230Z"
+  }
+]

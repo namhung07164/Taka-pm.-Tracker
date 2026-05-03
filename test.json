@@ -1,0 +1,12 @@
+taka_projects {
+  type: '',
+  location: 'L3',
+  budget: 0,
+  actual: 0,
+  code: 'L3-328-3',
+  name: 'Bering',
+  year: '2026',
+  note: '',
+  no: 1,
+  store: 'HCM'
+}
