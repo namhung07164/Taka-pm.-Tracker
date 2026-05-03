@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon } from 'lucide-react';
 import { format, isAfter, isBefore, isWithinInterval, startOfDay, parseISO, isValid } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -96,11 +96,34 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: (updates: Partial<Task>) => void, disabled?: boolean }) => {
   const [val, setVal] = useState(task.report || '');
   const [isUploading, setIsUploading] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkVal, setLinkVal] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     setVal(task.report || '');
   }, [task.report]);
+
+  const handleAddLink = () => {
+    if (!linkVal.trim()) return;
+    
+    let url = linkVal.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    const newAttachment = {
+      name: url,
+      url: url,
+      type: 'link'
+    };
+
+    const currentAttachments = task.attachments || [];
+    onUpdate({ attachments: [...currentAttachments, newAttachment] });
+    setLinkVal('');
+    setShowLinkInput(false);
+    toast.success("Link attached successfully!");
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -165,7 +188,7 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
             {task.attachments.map((att, idx) => (
               <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-[#F2F2F7] border border-transparent group">
                 <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 overflow-hidden flex-1 hover:text-[#007AFF] transition-colors">
-                   <FileIcon className="shrink-0 w-3.5 h-3.5 text-[#8E8E93]" />
+                   {att.type === 'link' ? <LinkIcon className="shrink-0 w-3.5 h-3.5 text-[#8E8E93]" /> : <FileIcon className="shrink-0 w-3.5 h-3.5 text-[#8E8E93]" />}
                    <span className="text-xs truncate font-medium text-[#1C1C1E]">{att.name}</span>
                 </a>
                 {!disabled && (
@@ -179,11 +202,38 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
         )}
 
         {!disabled && (
-          <div>
-             <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-             <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || disabled} className="w-full text-xs rounded-xl h-8 text-[#8E8E93] border-[#D1D1D6] hover:text-[#1C1C1E] hover:bg-[#F2F2F7] active:scale-95 transition-all">
-                {isUploading ? <span className="animate-pulse">Uploading...</span> : <><Paperclip className="w-3.5 h-3.5 mr-1.5" /> Add Attachment</>}
-             </Button>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || disabled} className="flex-1 text-xs rounded-xl h-8 text-[#8E8E93] border-[#D1D1D6] hover:text-[#1C1C1E] hover:bg-[#F2F2F7] active:scale-95 transition-all">
+                 {isUploading ? <span className="animate-pulse">Uploading...</span> : <><Paperclip className="w-3.5 h-3.5 mr-1.5" /> File</>}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowLinkInput(!showLinkInput)} disabled={disabled} className="text-xs rounded-xl h-8 px-3 text-[#8E8E93] border-[#D1D1D6] hover:text-[#1C1C1E] hover:bg-[#F2F2F7] active:scale-95 transition-all">
+                <LinkIcon className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            
+            <AnimatePresence>
+              {showLinkInput && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="flex gap-2 items-center overflow-hidden"
+                >
+                  <Input 
+                    placeholder="https://..." 
+                    value={linkVal} 
+                    onChange={e => setLinkVal(e.target.value)} 
+                    className="h-8 text-xs rounded-xl focus-visible:ring-[#007AFF] border-[#D1D1D6]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAddLink();
+                    }}
+                  />
+                  <Button size="sm" className="h-8 text-xs rounded-xl px-4 bg-[#007AFF] hover:bg-[#007AFF]/90" onClick={handleAddLink} disabled={!linkVal.trim()}>Add</Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
