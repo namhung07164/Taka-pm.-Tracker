@@ -354,7 +354,7 @@ const getPriorityWeight = (priority?: string) => {
   return 0; // Default
 };
 
-import { PersonalKanban } from './components/PersonalKanban';
+import { PersonalWorkspace } from './components/PersonalWorkspace';
 
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
@@ -1366,7 +1366,7 @@ export default function App() {
             </section>
             
             {/* Personal Kanban Section */}
-            <PersonalKanban />
+            <PersonalWorkspace />
           </>
         )}
 
