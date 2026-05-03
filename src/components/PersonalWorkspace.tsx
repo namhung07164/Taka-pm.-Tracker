@@ -40,6 +40,29 @@ const initialKanbanData: KanbanColumn[] = [
   { id: 'done', title: 'Done', color: 'green', tasks: [] }
 ];
 
+interface TodoItem {
+  id: string;
+  content: string;
+  checked: boolean;
+}
+
+interface TodoColumn {
+  id: string;
+  title: string;
+  color: BoardColor;
+  todos: TodoItem[];
+}
+
+const initialTodoColumns: TodoColumn[] = [
+  { id: 'mon', title: 'Monday', color: 'gray', todos: [] },
+  { id: 'tue', title: 'Tuesday', color: 'gray', todos: [] },
+  { id: 'wed', title: 'Wednesday', color: 'gray', todos: [] },
+  { id: 'thu', title: 'Thursday', color: 'gray', todos: [] },
+  { id: 'fri', title: 'Friday', color: 'gray', todos: [] },
+  { id: 'sat', title: 'Saturday', color: 'gray', todos: [] },
+  { id: 'sun', title: 'Sunday', color: 'gray', todos: [] },
+];
+
 interface NotionBlock {
   id: string;
   type: 'header' | 'todo';
@@ -65,7 +88,11 @@ export const PersonalWorkspace = () => {
   const [newTaskInput, setNewTaskInput] = useState('');
   
   // Todo State
-  const [todoBlocks, setTodoBlocks] = useState<NotionBlock[]>([]);
+  const [todoColumns, setTodoColumns] = useState<TodoColumn[]>([]);
+  const [addingToTodoCol, setAddingToTodoCol] = useState<string | null>(null);
+  const [newTodoInput, setNewTodoInput] = useState('');
+  
+  const [isDraggingKanban, setIsDraggingKanban] = useState(false);
   
   // Daily Planner State
   const [dailyBlocks, setDailyBlocks] = useState<NotionBlock[]>([]);
@@ -104,11 +131,11 @@ export const PersonalWorkspace = () => {
     }
 
     // Load Todo
-    const savedTodo = localStorage.getItem('taka_personal_todo');
-    if (savedTodo) {
-      try { setTodoBlocks(JSON.parse(savedTodo)); } catch(e) {}
+    const savedTodoV2 = localStorage.getItem('taka_personal_todo_v2');
+    if (savedTodoV2) {
+      try { setTodoColumns(JSON.parse(savedTodoV2)); } catch(e) { setTodoColumns(initialTodoColumns); }
     } else {
-      setTodoBlocks([{ id: uuidv4(), type: 'todo', content: '', checked: false }]);
+      setTodoColumns(initialTodoColumns);
     }
 
     // Load Daily
@@ -125,15 +152,32 @@ export const PersonalWorkspace = () => {
   useEffect(() => {
     if (isReady) {
       localStorage.setItem('taka_personal_tasks_v2', JSON.stringify(columns));
-      localStorage.setItem('taka_personal_todo', JSON.stringify(todoBlocks));
+      localStorage.setItem('taka_personal_todo_v2', JSON.stringify(todoColumns));
       localStorage.setItem('taka_personal_daily', JSON.stringify(dailyBlocks));
     }
-  }, [columns, todoBlocks, dailyBlocks, isReady]);
+  }, [columns, todoColumns, dailyBlocks, isReady]);
 
   // --- KANBAN LOGIC ---
-  const onDragEnd = (result: any) => {
+  const onDragStartKanban = () => {
+    setIsDraggingKanban(true);
+  };
+
+  const onDragEndKanban = (result: any) => {
+    setIsDraggingKanban(false);
     if (!result.destination) return;
     const { source, destination } = result;
+
+    if (destination.droppableId === 'kanban-trash') {
+      const newData = [...columns];
+      const sourceColIdx = newData.findIndex(c => c.id === source.droppableId);
+      if (sourceColIdx !== -1) {
+        const sourceTasks = [...newData[sourceColIdx].tasks];
+        sourceTasks.splice(source.index, 1);
+        newData[sourceColIdx].tasks = sourceTasks;
+        setColumns(newData);
+      }
+      return;
+    }
 
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return;
@@ -208,6 +252,53 @@ export const PersonalWorkspace = () => {
 
   const updateColumn = (colId: string, updates: Partial<KanbanColumn>) => {
       setColumns(columns.map(c => c.id === colId ? { ...c, ...updates } : c));
+  };
+
+  // --- TODO COLUMNS LOGIC ---
+  const handleAddTodo = (colId: string) => {
+    if (!newTodoInput.trim()) {
+      setAddingToTodoCol(null);
+      return;
+    }
+    const newTodo: TodoItem = { id: uuidv4(), content: newTodoInput.trim(), checked: false };
+    setTodoColumns(todoColumns.map(c => c.id === colId ? { ...c, todos: [...c.todos, newTodo] } : c));
+    setNewTodoInput('');
+    setAddingToTodoCol(null);
+  };
+
+  const handleDeleteTodo = (colId: string, todoIdx: number) => {
+    setTodoColumns(todoColumns.map(c => {
+      if (c.id === colId) {
+        const newTodos = [...c.todos];
+        newTodos.splice(todoIdx, 1);
+        return { ...c, todos: newTodos };
+      }
+      return c;
+    }));
+  };
+
+  const handleToggleTodo = (colId: string, todoIdx: number) => {
+    setTodoColumns(todoColumns.map(c => {
+      if (c.id === colId) {
+        const newTodos = [...c.todos];
+        newTodos[todoIdx].checked = !newTodos[todoIdx].checked;
+        return { ...c, todos: newTodos };
+      }
+      return c;
+    }));
+  };
+
+  const updateTodoColumn = (colId: string, updates: Partial<TodoColumn>) => {
+    setTodoColumns(todoColumns.map(c => c.id === colId ? { ...c, ...updates } : c));
+  };
+  
+  const deleteTodoColumn = (colId: string) => {
+    setTodoColumns(todoColumns.filter(c => c.id !== colId));
+  };
+
+  const addTodoColumn = () => {
+    const newCol: TodoColumn = { id: uuidv4(), title: 'New Day', color: 'gray', todos: [] };
+    setTodoColumns([...todoColumns, newCol]);
   };
 
   // --- NOTION BLOCKS LOGIC ---
@@ -319,7 +410,8 @@ export const PersonalWorkspace = () => {
       </div>
 
       {view === 'kanban' && (
-        <DragDropContext onDragEnd={onDragEnd}>
+        <div className="relative">
+          <DragDropContext onDragStart={onDragStartKanban} onDragEnd={onDragEndKanban}>
           <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
             {columns.map((col) => {
               const styles = BOARD_COLORS[col.color];
@@ -449,16 +541,171 @@ export const PersonalWorkspace = () => {
               );
             })}
           </div>
-        </DragDropContext>
+
+            <div
+              className={cn(
+                "fixed bottom-10 left-1/2 -translate-x-1/2 w-64 h-24 transition-all duration-300 z-50",
+                isDraggingKanban ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-10 pointer-events-none"
+              )}
+            >
+              <Droppable droppableId="kanban-trash">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "w-full h-full rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all duration-200 shadow-2xl backdrop-blur-xl",
+                      snapshot.isDraggingOver ? "bg-red-500/90 border-red-500 text-white scale-110" : "bg-white/95 border-red-500 text-red-500 scale-100"
+                    )}
+                  >
+                    <Trash2 className="w-8 h-8 opacity-80" />
+                    <span className="text-sm font-bold uppercase tracking-wider">Drop to Delete</span>
+                    <div className="hidden">{provided.placeholder}</div>
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          </DragDropContext>
+        </div>
       )}
 
-      {(view === 'todo' || view === 'daily') && (
+      {view === 'todo' && (
+        <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
+          {todoColumns.map((col) => {
+            const styles = BOARD_COLORS[col.color];
+            return (
+              <div key={col.id} className={cn("rounded-3xl p-4 flex flex-col shrink-0 w-[85vw] sm:w-[320px] snap-start border border-[#D1D1D6]/40 min-h-[400px]", styles.bg, styles.border)}>
+                 <div className="flex items-center justify-between mb-4 px-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                       <Popover>
+                          <PopoverTrigger asChild>
+                             <button className={cn("text-xs font-bold uppercase tracking-wider px-2 py-1 rounded truncate max-w-[200px] hover:opacity-80 transition-opacity whitespace-nowrap", styles.headerBg, styles.headerText)}>
+                               {col.title}
+                             </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-64 p-3 rounded-2xl shadow-xl border border-[#D1D1D6]/50 bg-white">
+                             <div className="space-y-4">
+                               <div>
+                                 <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">List Name</label>
+                                 <Input 
+                                   value={col.title}
+                                   onChange={e => updateTodoColumn(col.id, { title: e.target.value })}
+                                   className="h-8 text-xs font-medium"
+                                 />
+                               </div>
+                               <div>
+                                 <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">Color</label>
+                                 <div className="flex gap-1.5 flex-wrap">
+                                   {COLOR_KEYS.map(colorKey => (
+                                     <button
+                                       key={colorKey}
+                                       onClick={() => updateTodoColumn(col.id, { color: colorKey })}
+                                       className={cn(
+                                         "w-6 h-6 rounded-full border border-black/10 transition-transform hover:scale-110",
+                                         BOARD_COLORS[colorKey].bg,
+                                         col.color === colorKey ? "ring-2 ring-black/30 ring-offset-1" : ""
+                                       )}
+                                       title={colorKey}
+                                     />
+                                   ))}
+                                 </div>
+                               </div>
+                               <div className="pt-2 border-t border-[#F2F2F7]">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    onClick={() => deleteTodoColumn(col.id)} 
+                                    className="w-full text-red-500 hover:bg-red-50 hover:text-red-600 h-8 text-xs justify-start px-2"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete List
+                                  </Button>
+                               </div>
+                             </div>
+                          </PopoverContent>
+                       </Popover>
+                    </div>
+                    <span className="text-[#8E8E93] text-xs font-bold bg-[#E5E5EA] px-2 py-0.5 rounded-full shrink-0">{col.todos.length}</span>
+                 </div>
+                 
+                 <div className="flex-1 flex flex-col gap-2 min-h-[50px] transition-colors rounded-2xl">
+                    {col.todos.map((todo, index) => (
+                      <div key={todo.id} className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex gap-3 items-start group">
+                         <button 
+                             onClick={() => handleToggleTodo(col.id, index)}
+                             className={cn("mt-0.5 shrink-0 transition-colors", todo.checked ? "text-[#007AFF]" : "text-[#D1D1D6] hover:text-[#8E8E93]")}
+                         >
+                            {todo.checked ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                         </button>
+                         <input 
+                            type="text"
+                            value={todo.content}
+                            onChange={(e) => {
+                               const newTodos = [...col.todos];
+                               newTodos[index].content = e.target.value;
+                               updateTodoColumn(col.id, { todos: newTodos });
+                            }}
+                            className={cn(
+                               "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] text-sm font-medium leading-tight",
+                               todo.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] opacity-70" : "text-[#1C1C1E]"
+                            )}
+                         />
+                         <button
+                           onClick={() => handleDeleteTodo(col.id, index)}
+                           className="text-[#8E8E93] hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0 pt-0.5"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </button>
+                      </div>
+                    ))}
+                 </div>
+                 
+                 {addingToTodoCol === col.id ? (
+                    <div className="mt-3 bg-white p-3 rounded-2xl border border-[#D1D1D6]/40 shadow-sm flex flex-col gap-2">
+                      <Input 
+                        autoFocus
+                        placeholder="Enter todo..."
+                        value={newTodoInput}
+                        onChange={(e) => setNewTodoInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddTodo(col.id);
+                          if (e.key === 'Escape') {
+                             setAddingToTodoCol(null);
+                             setNewTodoInput('');
+                          }
+                        }}
+                        className="text-sm border-none shadow-none focus-visible:ring-0 p-0 h-auto"
+                      />
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button size="sm" onClick={() => handleAddTodo(col.id)} className="bg-[#007AFF] hover:bg-[#007AFF]/90 h-8 rounded-xl flex-1">Add</Button>
+                        <Button size="sm" variant="ghost" onClick={() => { setAddingToTodoCol(null); setNewTodoInput(''); }} className="h-8 rounded-xl text-red-500">Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setAddingToTodoCol(col.id)}
+                      className="mt-3 flex items-center justify-center gap-2 p-3 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-white transition-colors rounded-2xl border border-transparent border-dashed hover:border-[#D1D1D6] font-medium text-sm"
+                    >
+                      <Plus className="w-4 h-4" /> Add Todo
+                    </button>
+                  )}
+              </div>
+            );
+          })}
+          
+          <div className="shrink-0 pt-4">
+             <Button onClick={addTodoColumn} variant="outline" className="h-10 rounded-xl px-4 text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6] bg-white">
+                <Plus className="w-4 h-4 mr-2" /> Add Column
+             </Button>
+          </div>
+        </div>
+      )}
+
+      {view === 'daily' && (
         <div className="bg-white rounded-[2rem] border border-[#D1D1D6]/40 p-6 sm:p-10 min-h-[60vh]">
            <div className="max-w-2xl mx-auto space-y-1">
-             {(view === 'todo' ? todoBlocks : dailyBlocks).map((block, index) => {
-                const isTodo = view === 'todo';
-                const blocks = isTodo ? todoBlocks : dailyBlocks;
-                const setBlocks = isTodo ? setTodoBlocks : setDailyBlocks;
+             {dailyBlocks.map((block, index) => {
+                const blocks = dailyBlocks;
+                const setBlocks = setDailyBlocks;
 
                 return (
                   <div key={block.id} className="group flex items-start -ml-8 hover:bg-[#F2F2F7]/50 rounded-xl transition-colors">
@@ -518,8 +765,8 @@ export const PersonalWorkspace = () => {
              <div 
                className="h-24 w-full cursor-text" 
                onClick={() => {
-                 const blocks = view === 'todo' ? todoBlocks : dailyBlocks;
-                 const setBlocks = view === 'todo' ? setTodoBlocks : setDailyBlocks;
+                 const blocks = dailyBlocks;
+                 const setBlocks = setDailyBlocks;
                  if (blocks.length === 0 || blocks[blocks.length - 1].content !== '') {
                    const newBlock: NotionBlock = { id: uuidv4(), type: 'todo', content: '', checked: false };
                    setBlocks([...blocks, newBlock]);
