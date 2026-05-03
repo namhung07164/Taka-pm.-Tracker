@@ -39,6 +39,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Task, TaskStatus, RequestStatus, DelegationStatus, ActionRequest } from './types';
+import { dict, Language } from './i18n';
 
 enum OperationType {
   CREATE = 'create',
@@ -304,6 +305,8 @@ const getPriorityWeight = (priority?: string) => {
 };
 
 export default function App() {
+  const [lang, setLang] = useState<Language>('en');
+  const t = dict[lang];
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -810,16 +813,32 @@ export default function App() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none mb-1">
-              Official Cloud v1.0
+              {t.officialCloud}
             </span>
-            <h1 className="text-xl font-bold tracking-tight text-[#000000]">Task Tracker</h1>
+            <h1 className="text-xl font-bold tracking-tight text-[#000000]">{t.taskTracker}</h1>
           </div>
           
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5 mr-2 bg-[#F2F2F7] p-1 rounded-lg">
+              <button 
+                onClick={() => setLang('en')}
+                className={cn('w-6 h-6 flex items-center justify-center rounded transition-all', lang === 'en' ? 'bg-white shadow text-sm' : 'text-sm opacity-50 hover:opacity-100')}
+                title="English"
+              >
+                🇺🇸
+              </button>
+              <button 
+                onClick={() => setLang('ja')}
+                className={cn('w-6 h-6 flex items-center justify-center rounded transition-all', lang === 'ja' ? 'bg-white shadow text-sm' : 'text-sm opacity-50 hover:opacity-100')}
+                title="Japanese"
+              >
+                🇯🇵
+              </button>
+            </div>
             {!currentAppUser ? (
               <Button disabled variant="ghost" className="text-[#007AFF] font-semibold">
                 <LogIn className="w-4 h-4 mr-1.5" />
-                Login required
+                {t.loginRequired}
               </Button>
             ) : (
               <div className="flex items-center gap-2">
@@ -851,7 +870,7 @@ export default function App() {
                         className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-[#D1D1D6]/40 overflow-hidden z-50 origin-top-right"
                       >
                         <div className="bg-[#F2F2F7]/50 px-4 py-3 border-b border-[#D1D1D6]/40 flex items-center justify-between">
-                          <h3 className="font-bold text-[#1C1C1E] text-sm">Notifications</h3>
+                          <h3 className="font-bold text-[#1C1C1E] text-sm">{t.notifications}</h3>
                           <span className="text-[10px] uppercase font-bold text-[#8E8E93] px-2 py-0.5 bg-[#E5E5EA] rounded-full">
                             {notifications.length}
                           </span>
@@ -859,7 +878,7 @@ export default function App() {
                         <div className="max-h-[300px] overflow-y-auto">
                           {notifications.length === 0 ? (
                             <div className="px-4 py-8 text-center text-sm text-[#8E8E93]">
-                              No notifications yet
+                              {t.noNotifications}
                             </div>
                           ) : (
                             <div className="flex flex-col">
@@ -907,12 +926,12 @@ export default function App() {
               <LogIn className="w-12 h-12 text-[#007AFF]" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight">System Login</h2>
-              <p className="text-[#8E8E93] max-w-xs mx-auto">Select your account from the Master records to proceed.</p>
+              <h2 className="text-2xl font-bold tracking-tight">{t.loginTitle}</h2>
+              <p className="text-[#8E8E93] max-w-xs mx-auto">{t.loginDesc}</p>
             </div>
             
             <div className="flex flex-col gap-4 w-full max-w-xs mt-6 text-left">
-               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1">Select User</Label>
+               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1">{t.selectExisting}</Label>
                <div className="space-y-2 max-h-64 overflow-y-auto p-2 bg-white rounded-2xl border border-[#D1D1D6] shadow-sm">
                  {systemUsers.length === 0 ? (
                    <p className="text-sm text-center text-gray-400 py-6">Loading or no users found...</p>
@@ -934,10 +953,10 @@ export default function App() {
                </div>
 
                <div className="mt-4 pt-4 border-t border-gray-200">
-                 <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">Or Use Custom Name</Label>
+                 <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">{t.enterCustomId}</Label>
                  <div className="flex gap-2">
                     <Input 
-                      placeholder="Enter specific name..." 
+                      placeholder={t.enterName}
                       value={customNameInput}
                       onChange={e => setCustomNameInput(e.target.value)}
                       className="rounded-xl h-10 border-[#D1D1D6] text-sm"
