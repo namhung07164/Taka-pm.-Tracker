@@ -354,6 +354,8 @@ const getPriorityWeight = (priority?: string) => {
   return 0; // Default
 };
 
+import { PersonalKanban } from './components/PersonalKanban';
+
 export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const t = dict[lang];
@@ -1143,10 +1145,10 @@ export default function App() {
                 <span className="text-xs font-medium text-[#8E8E93]">{displayTasks.length} {t.tasksCount}</span>
               </div>
 
-              <div className="space-y-5">
+              <div className="flex overflow-x-auto gap-5 snap-x pb-6 no-scrollbar items-start">
                 <AnimatePresence mode="popLayout">
                   {displayTasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 bg-white rounded-3xl border border-[#D1D1D6]/50">
+                    <div className="flex flex-col items-center justify-center py-20 w-full text-center space-y-3 bg-white rounded-3xl border border-[#D1D1D6]/50 shrink-0">
                       <div className="p-4 bg-[#F2F2F7] rounded-full">
                         <LayoutDashboard className="w-8 h-8 text-[#8E8E93]" />
                       </div>
@@ -1172,10 +1174,10 @@ export default function App() {
                       <motion.div 
                         key={group.parentTask}
                         layout
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-white rounded-3xl sm:rounded-[2rem] border border-[#D1D1D6]/40 shadow-sm overflow-hidden"
+                        className="bg-white rounded-3xl sm:rounded-[2rem] border border-[#D1D1D6]/40 shadow-sm overflow-hidden shrink-0 w-[85vw] sm:w-[400px] snap-start"
                       >
                         {/* Parent Header */}
                         <div className="bg-[#F2F2F7]/50 px-5 sm:px-6 py-5 border-b border-[#D1D1D6]/40 flex flex-col justify-center gap-2">
@@ -1362,6 +1364,9 @@ export default function App() {
                 </AnimatePresence>
               </div>
             </section>
+            
+            {/* Personal Kanban Section */}
+            <PersonalKanban />
           </>
         )}
 
