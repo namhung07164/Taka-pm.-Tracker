@@ -976,11 +976,11 @@ export default function App() {
             {/* iOS Style Stats Scroll */}
             <section className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar items-stretch">
               {[
-                { label: 'New Task', value: stats['Assigned'], color: 'bg-white text-amber-600', icon: Clock },
-                { label: 'In Progress', value: stats['On Process'], color: 'bg-[#007AFF] text-white', icon: Clock },
-                { label: 'Waiting Approval', value: stats['Review'], color: 'bg-purple-500 text-white', icon: AlertCircle },
-                { label: 'Completed', value: stats['Done'], color: 'bg-[#34C759] text-white', icon: CheckCircle2 },
-                { label: 'Needs Rework', value: stats['Reject'], color: 'bg-[#FF3B30] text-white', icon: AlertCircle },
+                { label: t.assignedToMe, value: stats['Assigned'], color: 'bg-white text-amber-600', icon: Clock },
+                { label: t.inProgress, value: stats['On Process'], color: 'bg-[#007AFF] text-white', icon: Clock },
+                { label: t.waitingApproval, value: stats['Review'], color: 'bg-purple-500 text-white', icon: AlertCircle },
+                { label: t.completed, value: stats['Done'], color: 'bg-[#34C759] text-white', icon: CheckCircle2 },
+                { label: t.needsRework, value: stats['Reject'], color: 'bg-[#FF3B30] text-white', icon: AlertCircle },
               ].map((stat) => (
                 <div key={stat.label} className={cn("flex-shrink-0 w-32 p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/30", stat.color)}>
                   <stat.icon className="w-5 h-5 mb-3 opacity-80" />
@@ -990,7 +990,7 @@ export default function App() {
               ))}
               
               <div className="flex-shrink-0 flex flex-col justify-between ml-2 bg-white rounded-2xl border border-[#D1D1D6]/30 py-2.5 px-3 shadow-sm h-full max-h-[116px]">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5 px-1">Priority filter</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5 px-1">{t.priorityFilter}</p>
                   <div className="flex flex-col gap-1 overflow-y-auto no-scrollbar">
                     {['All', 'High', 'Mid-High', 'Medium', 'Normal', 'Low'].map(prio => (
                        <button 
@@ -1012,12 +1012,12 @@ export default function App() {
             <section className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
               {['All', 'Assigned', 'On Process', 'Review', 'Done', 'Reject'].map((filterVal) => {
                 const displayMap: any = {
-                  'All': 'All Tasks',
-                  'Assigned': 'New Task',
-                  'On Process': 'In Progress',
-                  'Review': 'Waiting Approval',
-                  'Done': 'Completed',
-                  'Reject': 'Needs Rework'
+                  'All': t.allTasks,
+                  'Assigned': t.assignedToMe,
+                  'On Process': t.inProgress,
+                  'Review': t.waitingApproval,
+                  'Done': t.completed,
+                  'Reject': t.needsRework
                 };
                 return (
                   <Button 
@@ -1049,7 +1049,7 @@ export default function App() {
                     parentTaskFilter === pTask ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-[#F2F2F7]/50 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-[#E5E5EA]"
                   )}
                 >
-                  {pTask === 'All' ? 'All Projects/Groups' : pTask}
+                  {pTask === 'All' ? t.allProjectsGroups : pTask}
                 </Button>
               ))}
             </section>
@@ -1057,8 +1057,8 @@ export default function App() {
             {/* Task List Section */}
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-lg font-bold text-[#1C1C1E]">Task list</h2>
-                <span className="text-xs font-medium text-[#8E8E93]">{displayTasks.length} tasks</span>
+                <h2 className="text-lg font-bold text-[#1C1C1E]">{t.taskList}</h2>
+                <span className="text-xs font-medium text-[#8E8E93]">{displayTasks.length} {t.tasksCount}</span>
               </div>
 
               <div className="space-y-5">
@@ -1068,7 +1068,7 @@ export default function App() {
                       <div className="p-4 bg-[#F2F2F7] rounded-full">
                         <LayoutDashboard className="w-8 h-8 text-[#8E8E93]" />
                       </div>
-                      <p className="text-[#8E8E93] font-medium">No tasks found for your account.</p>
+                      <p className="text-[#8E8E93] font-medium">{t.noTasks}</p>
                     </div>
                   ) : (
                     Object.values(
@@ -1106,14 +1106,14 @@ export default function App() {
                                   {group.projectName ? ` - ${group.projectName}` : ''}
                                 </span>
                                 <span className="text-[10px] font-medium text-[#8E8E93]">
-                                  {group.tasks.length} delegation task(s)
+                                  {group.tasks.length} {t.delegationTasks}
                                 </span>
                               </div>
                              </div>
 
                              {group.tasks[0]?.parentComments && (
                                 <div className="mt-3 sm:mt-0 bg-[#F2F2F7] rounded-xl p-3.5 sm:max-w-md w-full sm:w-auto min-w-0">
-                                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5">Group Note from Master</div>
+                                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5">{t.groupNote}</div>
                                    <p className="text-[13px] sm:text-sm font-medium text-[#1C1C1E] whitespace-pre-wrap break-words min-w-0 w-full">{group.tasks[0].parentComments}</p>
                                 </div>
                              )}
@@ -1142,7 +1142,10 @@ export default function App() {
                                           status === 'Upcoming' && "bg-gray-100 text-gray-600"
                                         )}
                                       >
-                                        {status}
+                                        {status === 'In Progress' ? t.inProgress : 
+                                         status === 'Completed' ? t.completed : 
+                                         status === 'Not Update' ? t.notUpdate : 
+                                         status /* Upcoming */ }
                                       </Badge>
                                     </div>
                                     
@@ -1161,7 +1164,7 @@ export default function App() {
                                       
                                       {task.comments && (
                                         <div className="bg-[#F2F2F7]/80 border-l-[3px] border-[#8E8E93] pl-3 py-2 pr-4 rounded-r-xl max-w-full mt-2 min-w-0 break-words">
-                                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] block mb-1">Comment from Master</span>
+                                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] block mb-1">{t.commentFromMaster}</span>
                                           <p className="text-[13px] sm:text-sm md:text-base font-medium text-[#1C1C1E] whitespace-pre-wrap break-words min-w-0 w-full">{task.comments}</p>
                                         </div>
                                       )}
@@ -1177,11 +1180,11 @@ export default function App() {
 
                                 <div className="grid grid-cols-2 gap-4 py-4 border-y border-[#F2F2F7]/80 mt-auto">
                                   <div className="space-y-1.5 mt-1">
-                                    <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">Start (Act)</span>
+                                    <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">{t.startAct}</span>
                                     <div className="text-[#1C1C1E] font-semibold">{safeFormatDate(task.startDate, 'MMM d, yyyy')}</div>
                                   </div>
                                   <div className="space-y-1.5 mt-1">
-                                    <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">Finish (Act)</span>
+                                    <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">{t.finishAct}</span>
                                     <div className="text-[#1C1C1E] font-semibold">{safeFormatDate(task.finishDate, 'MMM d, yyyy')}</div>
                                   </div>
                                 </div>
@@ -1198,7 +1201,7 @@ export default function App() {
                                       >
                                         <Clock className="w-3.5 h-3.5 mr-2 opacity-70 shrink-0" />
                                         <div className="flex flex-col items-start leading-tight">
-                                          <span className="text-[9px] opacity-70 uppercase tracking-tighter">Status</span>
+                                          <span className="text-[9px] opacity-70 uppercase tracking-tighter">{t.status}</span>
                                           <span className="text-left whitespace-pre-wrap">{getAppBStatusDisplay(task.delegationStatus)}</span>
                                         </div>
                                       </Button>
@@ -1215,35 +1218,35 @@ export default function App() {
                                                 </div>
                                             ) : task.siteUpdateDate ? (
                                                 <div className="flex flex-col items-start leading-tight">
-                                                   <span className="text-[9px] text-gray-400 uppercase tracking-tighter">Updated</span>
+                                                   <span className="text-[9px] text-gray-400 uppercase tracking-tighter">{t.update}</span>
                                                    <span>{safeFormatDate(task.siteUpdateDate, 'MMM d, yyyy')}</span>
                                                 </div>
                                             ) : (
-                                              "Action"
+                                              t.action
                                             )}
                                           </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-[calc(100vw-32px)] sm:w-64 p-2 rounded-2xl shadow-xl border border-[#D1D1D6]/50 bg-white/95 backdrop-blur-xl">
-                                            <p className="text-[10px] px-2 pt-1 pb-1 font-bold text-gray-400 uppercase tracking-widest mb-1">Select Action</p>
+                                            <p className="text-[10px] px-2 pt-1 pb-1 font-bold text-gray-400 uppercase tracking-widest mb-1">{t.selectAction}</p>
                                             
                                             {(!task.delegationStatus || task.delegationStatus === 'Assigned') && (
                                                <Button className="w-full justify-start h-10 rounded-xl text-xs font-medium" variant="ghost" onClick={() => handleActionUpdate(task.id, 'Accept')}>
-                                                  ✅ Accept Task
+                                                  ✅ {t.acceptTask}
                                                </Button>
                                             )}
                                             
                                             {(task.delegationStatus === 'On Process' || task.delegationStatus === 'Reject') && (
                                               <Button className="w-full justify-start h-10 rounded-xl text-[13px] font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" variant="ghost" onClick={() => handleActionUpdate(task.id, 'Review')}>
-                                                📤 Request Review
+                                                📤 {t.requestReview}
                                               </Button>
                                             )}
                                             
                                             {task.delegationStatus === 'Review' && (
-                                               <p className="text-xs text-center text-gray-500 py-3 mt-1 bg-gray-50 rounded-xl">Waiting for approval...</p>
+                                               <p className="text-xs text-center text-gray-500 py-3 mt-1 bg-gray-50 rounded-xl">{t.waitingApprovalNote}</p>
                                             )}
 
                                             {task.delegationStatus === 'Done' && (
-                                               <p className="text-xs text-center text-green-600 font-medium py-3 mt-1 bg-green-50 rounded-xl">Task is completed.</p>
+                                               <p className="text-xs text-center text-green-600 font-medium py-3 mt-1 bg-green-50 rounded-xl">{t.taskCompletedNote}</p>
                                             )}
                                         </PopoverContent>
                                       </Popover>
@@ -1255,12 +1258,12 @@ export default function App() {
                                       <PopoverTrigger asChild>
                                         <Button variant="ghost" className="h-auto min-h-[44px] py-2.5 w-full justify-start text-[11px] sm:text-xs font-semibold rounded-2xl bg-[#F2F2F7] px-3 border border-transparent hover:bg-[#E5E5EA] active:scale-95 transition-all text-left">
                                           <MessageSquare className="w-4 h-4 mr-2.5 opacity-70 shrink-0 mt-0.5" />
-                                          <span className="whitespace-pre-wrap break-words text-left leading-relaxed">{task.report || "Tap to write report..."}</span>
+                                          <span className="whitespace-pre-wrap break-words text-left leading-relaxed">{task.report || t.tapToWriteReport}</span>
                                         </Button>
                                       </PopoverTrigger>
                                       <PopoverContent className="w-[calc(100vw-32px)] sm:w-96 p-5 rounded-[24px] shadow-2xl border border-[#D1D1D6]/50 bg-white/95 backdrop-blur-xl">
                                         <div className="space-y-3">
-                                          <Label className="text-[11px] font-bold uppercase tracking-widest text-[#8E8E93]">Report Content</Label>
+                                          <Label className="text-[11px] font-bold uppercase tracking-widest text-[#8E8E93]">{t.reportContent}</Label>
                                           <TaskReportEditor disabled={task.delegationStatus === 'Done'} task={task} onUpdate={(updates) => updateTaskFields(task.id, updates)} />
                                         </div>
                                       </PopoverContent>
