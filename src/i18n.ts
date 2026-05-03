@@ -66,7 +66,8 @@ export const dict = {
     waitingApprovalNote: "Waiting for approval...",
     taskCompletedNote: "Task is completed.",
     tapToWriteReport: "Tap to write report...",
-    reportContent: "Report Content"
+    reportContent: "Report Content",
+    clearSelection: "Clear Selection"
   },
   ja: {
     officialCloud: "公式クラウド v1.0",
@@ -135,7 +136,8 @@ export const dict = {
     waitingApprovalNote: "承認待ち...",
     taskCompletedNote: "タスクは完了しました。",
     tapToWriteReport: "タップしてレポートを書く...",
-    reportContent: "レポートの内容"
+    reportContent: "レポートの内容",
+    clearSelection: "選択をクリア"
   }
 };
 export type Language = 'en' | 'ja';

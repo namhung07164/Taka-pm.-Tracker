@@ -364,6 +364,7 @@ export default function App() {
   const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
   const [currentAppUser, setCurrentAppUser] = useState<any>(null);
   const [customNameInput, setCustomNameInput] = useState('');
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [parentTaskFilter, setParentTaskFilter] = useState<string>('All');
@@ -419,6 +420,7 @@ export default function App() {
       if (!prevTask) {
         newNotifications.push({
           id: Date.now().toString() + Math.random(),
+          taskId: task.id,
           title: 'New Task Assigned',
           message: `You have been assigned to: ${task.title}`,
           type: 'assigned',
@@ -433,6 +435,7 @@ export default function App() {
            if (cStatus === 'Reject' || cStatus === 'Rejected') {
              newNotifications.push({
                 id: Date.now().toString() + Math.random(),
+                taskId: task.id,
                 title: 'Task Rejected',
                 message: `Master rejected task: ${task.title}`,
                 type: 'reject',
@@ -443,6 +446,7 @@ export default function App() {
            if (cStatus === 'Done' || cStatus === 'Completed') {
              newNotifications.push({
                 id: Date.now().toString() + Math.random(),
+                taskId: task.id,
                 title: 'Task Approved',
                 message: `Master approved task: ${task.title}`,
                 type: 'approve',
@@ -815,6 +819,11 @@ export default function App() {
   const displayTasks = useMemo(() => {
     let tasksToDisplay = filteredTasks;
     
+    if (selectedTaskId) {
+      tasksToDisplay = tasksToDisplay.filter(t => t.id === selectedTaskId);
+      return tasksToDisplay;
+    }
+
     if (statusFilter !== 'All') {
       tasksToDisplay = tasksToDisplay.filter(t => t.delegationStatus === statusFilter);
     }
@@ -833,7 +842,7 @@ export default function App() {
     return [...tasksToDisplay].sort((a, b) => {
       return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
     });
-  }, [filteredTasks, statusFilter, priorityFilter, parentTaskFilter]);
+  }, [filteredTasks, statusFilter, priorityFilter, parentTaskFilter, selectedTaskId]);
 
   const stats = useMemo(() => {
     const counts = {
@@ -933,7 +942,14 @@ export default function App() {
                           ) : (
                             <div className="flex flex-col">
                               {[...notifications].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((notif) => (
-                                <div key={notif.id} className={`px-4 py-3 border-b border-[#D1D1D6]/30 last:border-0 hover:bg-[#F2F2F7]/50 transition-colors ${!notif.isRead ? 'bg-blue-50/30' : ''}`}>
+                                <div 
+                                  key={notif.id} 
+                                  className={`px-4 py-3 border-b border-[#D1D1D6]/30 last:border-0 hover:bg-[#F2F2F7]/50 transition-colors cursor-pointer ${!notif.isRead ? 'bg-blue-50/30' : ''}`}
+                                  onClick={() => {
+                                    if (notif.taskId) setSelectedTaskId(notif.taskId);
+                                    setShowNotifications(false);
+                                  }}
+                                >
                                   <div className="flex items-start gap-3">
                                     <div className={`mt-0.5 shrink-0 w-2 h-2 rounded-full ${
                                       notif.type === 'assigned' ? 'bg-blue-500' :
@@ -960,7 +976,7 @@ export default function App() {
 
                 <div className="w-px h-4 bg-[#D1D1D6] mx-1" />
 
-                <Button onClick={() => setCurrentAppUser(null)} variant="ghost" size="icon" className="text-[#8E8E93] hover:text-red-500 transition-colors">
+                <Button onClick={() => { setCurrentAppUser(null); setSelectedTaskId(null); }} variant="ghost" size="icon" className="text-[#8E8E93] hover:text-red-500 transition-colors">
                   <LogOut className="w-5 h-5" />
                 </Button>
               </div>
@@ -1045,7 +1061,10 @@ export default function App() {
                     {['All', 'High', 'Mid-High', 'Medium', 'Normal', 'Low'].map(prio => (
                        <button 
                          key={prio} 
-                         onClick={() => setPriorityFilter(prio)}
+                         onClick={() => {
+                           setPriorityFilter(prio);
+                           setSelectedTaskId(null);
+                         }}
                          className={cn(
                            "text-[9px] uppercase font-bold text-left px-2 py-1.5 rounded-lg transition-colors leading-none",
                            priorityFilter === prio ? "bg-blue-50 text-blue-600" : "text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E]"
@@ -1074,7 +1093,10 @@ export default function App() {
                     key={filterVal}
                     variant="outline"
                     size="sm"
-                    onClick={() => setStatusFilter(filterVal)}
+                    onClick={() => {
+                      setStatusFilter(filterVal);
+                      setSelectedTaskId(null);
+                    }}
                     className={cn(
                       "rounded-full text-xs font-semibold px-4 h-8 border-[#D1D1D6]", 
                       statusFilter === filterVal ? "bg-[#1C1C1E] text-white border-transparent" : "bg-white text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-[#F2F2F7]"
@@ -1093,7 +1115,10 @@ export default function App() {
                   key={pTask}
                   variant="outline"
                   size="sm"
-                  onClick={() => setParentTaskFilter(pTask)}
+                  onClick={() => {
+                    setParentTaskFilter(pTask);
+                    setSelectedTaskId(null);
+                  }}
                   className={cn(
                     "rounded-xl text-[10px] sm:text-xs font-semibold px-3 h-7 sm:h-8 border-[#D1D1D6]/50 whitespace-nowrap", 
                     parentTaskFilter === pTask ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-[#F2F2F7]/50 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-[#E5E5EA]"
@@ -1107,7 +1132,14 @@ export default function App() {
             {/* Task List Section */}
             <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-lg font-bold text-[#1C1C1E]">{t.taskList}</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-[#1C1C1E]">{t.taskList}</h2>
+                  {selectedTaskId && (
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedTaskId(null)} className="h-6 px-2 text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full">
+                      {t.clearSelection}
+                    </Button>
+                  )}
+                </div>
                 <span className="text-xs font-medium text-[#8E8E93]">{displayTasks.length} {t.tasksCount}</span>
               </div>
 
