@@ -93,6 +93,7 @@ export const PersonalWorkspace = () => {
   const [newTodoInput, setNewTodoInput] = useState('');
   
   const [isDraggingKanban, setIsDraggingKanban] = useState(false);
+  const [isDraggingTodo, setIsDraggingTodo] = useState(false);
   
   // Daily Planner State
   const [dailyBlocks, setDailyBlocks] = useState<NotionBlock[]>([]);
@@ -255,6 +256,49 @@ export const PersonalWorkspace = () => {
   };
 
   // --- TODO COLUMNS LOGIC ---
+  const onDragStartTodo = () => {
+    setIsDraggingTodo(true);
+  };
+
+  const onDragEndTodo = (result: any) => {
+    setIsDraggingTodo(false);
+    if (!result.destination) return;
+    const { source, destination } = result;
+
+    if (destination.droppableId === 'todo-trash') {
+      const newData = [...todoColumns];
+      const sourceColIdx = newData.findIndex(c => c.id === source.droppableId);
+      if (sourceColIdx !== -1) {
+        const sourceTodos = [...newData[sourceColIdx].todos];
+        sourceTodos.splice(source.index, 1);
+        newData[sourceColIdx].todos = sourceTodos;
+        setTodoColumns(newData);
+      }
+      return;
+    }
+
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
+    const newData = [...todoColumns];
+    const sourceColIdx = newData.findIndex(c => c.id === source.droppableId);
+    const destColIdx = newData.findIndex(c => c.id === destination.droppableId);
+
+    const sourceTodos = [...newData[sourceColIdx].todos];
+    const destTodos = source.droppableId === destination.droppableId ? sourceTodos : [...newData[destColIdx].todos];
+
+    const [removed] = sourceTodos.splice(source.index, 1);
+    destTodos.splice(destination.index, 0, removed);
+
+    newData[sourceColIdx].todos = sourceTodos;
+    if (source.droppableId !== destination.droppableId) {
+      newData[destColIdx].todos = destTodos;
+    }
+
+    setTodoColumns(newData);
+  };
+
   const handleAddTodo = (colId: string) => {
     if (!newTodoInput.trim()) {
       setAddingToTodoCol(null);
@@ -375,7 +419,7 @@ export const PersonalWorkspace = () => {
   return (
     <div className="py-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-1 mb-6 gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <h2 className="text-lg font-bold text-[#1C1C1E]">Personal Workspace</h2>
           {view === 'kanban' && (
             <Button onClick={addColumn} variant="outline" size="sm" className="h-7 w-7 p-0 rounded-full bg-white text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6]">
@@ -384,27 +428,27 @@ export const PersonalWorkspace = () => {
           )}
         </div>
 
-        <div className="flex bg-[#E5E5EA]/60 p-1 rounded-2xl shrink-0 w-fit">
+        <div className="flex bg-[#E5E5EA]/60 p-1 rounded-2xl w-full overflow-x-auto no-scrollbar sm:w-fit shrink-0">
           <Button 
             onClick={() => setView('kanban')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-3 text-xs font-semibold flex gap-2 w-full sm:w-auto", view === 'kanban' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'kanban' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
           >
-            <KanbanSquare className="w-4 h-4" /> Board
+            <KanbanSquare className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> Board
           </Button>
           <Button 
             onClick={() => setView('todo')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-3 text-xs font-semibold flex gap-2 w-full sm:w-auto", view === 'todo' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'todo' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
           >
-            <CheckSquare className="w-4 h-4" /> Todo Check
+            <CheckSquare className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> Todo Check
           </Button>
           <Button 
             onClick={() => setView('daily')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-3 text-xs font-semibold flex gap-2 w-full sm:w-auto", view === 'daily' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'daily' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
           >
-            <CalendarDays className="w-4 h-4" /> Daily Planner
+            <CalendarDays className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> <span className="hidden xs:inline">Daily</span> Planner
           </Button>
         </div>
       </div>
@@ -484,11 +528,11 @@ export const PersonalWorkspace = () => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className={`bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex justify-between items-start group ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : ''}`}
+                                {...provided.dragHandleProps}
+                                className={`bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex justify-between items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
                               >
                                 <div 
-                                  {...provided.dragHandleProps} 
-                                  className="pt-1 pr-2 cursor-grab active:cursor-grabbing text-[#D1D1D6] hover:text-[#8E8E93] transition-colors"
+                                  className="pt-1 pr-2 text-[#D1D1D6] hover:text-[#8E8E93] transition-colors"
                                 >
                                   <GripVertical className="w-4 h-4" />
                                 </div>
@@ -570,133 +614,185 @@ export const PersonalWorkspace = () => {
       )}
 
       {view === 'todo' && (
-        <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
-          {todoColumns.map((col) => {
-            const styles = BOARD_COLORS[col.color];
-            return (
-              <div key={col.id} className={cn("rounded-3xl p-4 flex flex-col shrink-0 w-[85vw] sm:w-[320px] snap-start border border-[#D1D1D6]/40 min-h-[400px]", styles.bg, styles.border)}>
-                 <div className="flex items-center justify-between mb-4 px-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
-                       <Popover>
-                          <PopoverTrigger asChild>
-                             <button className={cn("text-xs font-bold uppercase tracking-wider px-2 py-1 rounded truncate max-w-[200px] hover:opacity-80 transition-opacity whitespace-nowrap", styles.headerBg, styles.headerText)}>
-                               {col.title}
-                             </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-64 p-3 rounded-2xl shadow-xl border border-[#D1D1D6]/50 bg-white">
-                             <div className="space-y-4">
-                               <div>
-                                 <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">List Name</label>
-                                 <Input 
-                                   value={col.title}
-                                   onChange={e => updateTodoColumn(col.id, { title: e.target.value })}
-                                   className="h-8 text-xs font-medium"
-                                 />
-                               </div>
-                               <div>
-                                 <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">Color</label>
-                                 <div className="flex gap-1.5 flex-wrap">
-                                   {COLOR_KEYS.map(colorKey => (
-                                     <button
-                                       key={colorKey}
-                                       onClick={() => updateTodoColumn(col.id, { color: colorKey })}
-                                       className={cn(
-                                         "w-6 h-6 rounded-full border border-black/10 transition-transform hover:scale-110",
-                                         BOARD_COLORS[colorKey].bg,
-                                         col.color === colorKey ? "ring-2 ring-black/30 ring-offset-1" : ""
-                                       )}
-                                       title={colorKey}
+        <div className="relative">
+          <DragDropContext onDragStart={onDragStartTodo} onDragEnd={onDragEndTodo}>
+            <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
+              {todoColumns.map((col) => {
+                const styles = BOARD_COLORS[col.color];
+                return (
+                  <div key={col.id} className={cn("rounded-3xl p-4 flex flex-col shrink-0 w-[85vw] sm:w-[320px] snap-start border border-[#D1D1D6]/40 min-h-[400px]", styles.bg, styles.border)}>
+                     <div className="flex items-center justify-between mb-4 px-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                           <Popover>
+                              <PopoverTrigger asChild>
+                                 <button className={cn("text-xs font-bold uppercase tracking-wider px-2 py-1 rounded truncate max-w-[200px] hover:opacity-80 transition-opacity whitespace-nowrap", styles.headerBg, styles.headerText)}>
+                                   {col.title}
+                                 </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-64 p-3 rounded-2xl shadow-xl border border-[#D1D1D6]/50 bg-white">
+                                 <div className="space-y-4">
+                                   <div>
+                                     <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">List Name</label>
+                                     <Input 
+                                       value={col.title}
+                                       onChange={e => updateTodoColumn(col.id, { title: e.target.value })}
+                                       className="h-8 text-xs font-medium"
                                      />
-                                   ))}
+                                   </div>
+                                   <div>
+                                     <label className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest mb-1.5 block">Color</label>
+                                     <div className="flex gap-1.5 flex-wrap">
+                                       {COLOR_KEYS.map(colorKey => (
+                                         <button
+                                           key={colorKey}
+                                           onClick={() => updateTodoColumn(col.id, { color: colorKey })}
+                                           className={cn(
+                                             "w-6 h-6 rounded-full border border-black/10 transition-transform hover:scale-110",
+                                             BOARD_COLORS[colorKey].bg,
+                                             col.color === colorKey ? "ring-2 ring-black/30 ring-offset-1" : ""
+                                           )}
+                                           title={colorKey}
+                                         />
+                                       ))}
+                                     </div>
+                                   </div>
+                                   <div className="pt-2 border-t border-[#F2F2F7]">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        onClick={() => deleteTodoColumn(col.id)} 
+                                        className="w-full text-red-500 hover:bg-red-50 hover:text-red-600 h-8 text-xs justify-start px-2"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete List
+                                      </Button>
+                                   </div>
                                  </div>
-                               </div>
-                               <div className="pt-2 border-t border-[#F2F2F7]">
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    onClick={() => deleteTodoColumn(col.id)} 
-                                    className="w-full text-red-500 hover:bg-red-50 hover:text-red-600 h-8 text-xs justify-start px-2"
+                              </PopoverContent>
+                           </Popover>
+                        </div>
+                        <span className="text-[#8E8E93] text-xs font-bold bg-[#E5E5EA] px-2 py-0.5 rounded-full shrink-0">{col.todos.length}</span>
+                     </div>
+                     
+                     <Droppable droppableId={col.id}>
+                       {(provided, snapshot) => (
+                         <div
+                           {...provided.droppableProps}
+                           ref={provided.innerRef}
+                           className={`flex-1 flex flex-col gap-2 min-h-[50px] transition-colors rounded-2xl ${snapshot.isDraggingOver ? 'bg-black/5' : ''}`}
+                         >
+                            {col.todos.map((todo, index) => (
+                              // @ts-ignore
+                              <Draggable key={todo.id} draggableId={todo.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={`bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex gap-3 items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
                                   >
-                                    <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete List
-                                  </Button>
-                               </div>
-                             </div>
-                          </PopoverContent>
-                       </Popover>
-                    </div>
-                    <span className="text-[#8E8E93] text-xs font-bold bg-[#E5E5EA] px-2 py-0.5 rounded-full shrink-0">{col.todos.length}</span>
-                 </div>
-                 
-                 <div className="flex-1 flex flex-col gap-2 min-h-[50px] transition-colors rounded-2xl">
-                    {col.todos.map((todo, index) => (
-                      <div key={todo.id} className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex gap-3 items-start group">
-                         <button 
-                             onClick={() => handleToggleTodo(col.id, index)}
-                             className={cn("mt-0.5 shrink-0 transition-colors", todo.checked ? "text-[#007AFF]" : "text-[#D1D1D6] hover:text-[#8E8E93]")}
-                         >
-                            {todo.checked ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                         </button>
-                         <input 
-                            type="text"
-                            value={todo.content}
-                            onChange={(e) => {
-                               const newTodos = [...col.todos];
-                               newTodos[index].content = e.target.value;
-                               updateTodoColumn(col.id, { todos: newTodos });
+                                     <div 
+                                       className="pt-1 text-[#D1D1D6] hover:text-[#8E8E93] transition-colors"
+                                     >
+                                       <GripVertical className="w-4 h-4" />
+                                     </div>
+                                     <button 
+                                         onClick={() => handleToggleTodo(col.id, index)}
+                                         className={cn("mt-0.5 shrink-0 transition-colors", todo.checked ? "text-[#007AFF]" : "text-[#D1D1D6] hover:text-[#8E8E93]")}
+                                     >
+                                        {todo.checked ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                                     </button>
+                                     <input 
+                                        type="text"
+                                        value={todo.content}
+                                        onChange={(e) => {
+                                           const newTodos = [...col.todos];
+                                           newTodos[index].content = e.target.value;
+                                           updateTodoColumn(col.id, { todos: newTodos });
+                                        }}
+                                        className={cn(
+                                           "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] text-sm font-medium leading-tight select-text cursor-text",
+                                           todo.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] opacity-70" : "text-[#1C1C1E]"
+                                        )}
+                                     />
+                                     <button
+                                       onClick={() => handleDeleteTodo(col.id, index)}
+                                       className="text-[#8E8E93] hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0 pt-0.5"
+                                     >
+                                       <Trash2 className="w-4 h-4" />
+                                     </button>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                         </div>
+                       )}
+                     </Droppable>
+                     
+                     {addingToTodoCol === col.id ? (
+                        <div className="mt-3 bg-white p-3 rounded-2xl border border-[#D1D1D6]/40 shadow-sm flex flex-col gap-2">
+                          <Input 
+                            autoFocus
+                            placeholder="Enter todo..."
+                            value={newTodoInput}
+                            onChange={(e) => setNewTodoInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleAddTodo(col.id);
+                              if (e.key === 'Escape') {
+                                 setAddingToTodoCol(null);
+                                 setNewTodoInput('');
+                              }
                             }}
-                            className={cn(
-                               "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] text-sm font-medium leading-tight",
-                               todo.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] opacity-70" : "text-[#1C1C1E]"
-                            )}
-                         />
-                         <button
-                           onClick={() => handleDeleteTodo(col.id, index)}
-                           className="text-[#8E8E93] hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0 pt-0.5"
-                         >
-                           <Trash2 className="w-4 h-4" />
-                         </button>
-                      </div>
-                    ))}
-                 </div>
-                 
-                 {addingToTodoCol === col.id ? (
-                    <div className="mt-3 bg-white p-3 rounded-2xl border border-[#D1D1D6]/40 shadow-sm flex flex-col gap-2">
-                      <Input 
-                        autoFocus
-                        placeholder="Enter todo..."
-                        value={newTodoInput}
-                        onChange={(e) => setNewTodoInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleAddTodo(col.id);
-                          if (e.key === 'Escape') {
-                             setAddingToTodoCol(null);
-                             setNewTodoInput('');
-                          }
-                        }}
-                        className="text-sm border-none shadow-none focus-visible:ring-0 p-0 h-auto"
-                      />
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button size="sm" onClick={() => handleAddTodo(col.id)} className="bg-[#007AFF] hover:bg-[#007AFF]/90 h-8 rounded-xl flex-1">Add</Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setAddingToTodoCol(null); setNewTodoInput(''); }} className="h-8 rounded-xl text-red-500">Cancel</Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setAddingToTodoCol(col.id)}
-                      className="mt-3 flex items-center justify-center gap-2 p-3 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-white transition-colors rounded-2xl border border-transparent border-dashed hover:border-[#D1D1D6] font-medium text-sm"
-                    >
-                      <Plus className="w-4 h-4" /> Add Todo
-                    </button>
-                  )}
+                            className="text-sm border-none shadow-none focus-visible:ring-0 p-0 h-auto"
+                          />
+                          <div className="flex items-center gap-2 mt-2">
+                            <Button size="sm" onClick={() => handleAddTodo(col.id)} className="bg-[#007AFF] hover:bg-[#007AFF]/90 h-8 rounded-xl flex-1">Add</Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setAddingToTodoCol(null); setNewTodoInput(''); }} className="h-8 rounded-xl text-red-500">Cancel</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setAddingToTodoCol(col.id)}
+                          className="mt-3 flex items-center justify-center gap-2 p-3 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-white transition-colors rounded-2xl border border-transparent border-dashed hover:border-[#D1D1D6] font-medium text-sm"
+                        >
+                          <Plus className="w-4 h-4" /> Add Todo
+                        </button>
+                      )}
+                  </div>
+                );
+              })}
+              
+              <div className="shrink-0 pt-4">
+                 <Button onClick={addTodoColumn} variant="outline" className="h-10 rounded-xl px-4 text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6] bg-white">
+                    <Plus className="w-4 h-4 mr-2" /> Add Column
+                 </Button>
               </div>
-            );
-          })}
-          
-          <div className="shrink-0 pt-4">
-             <Button onClick={addTodoColumn} variant="outline" className="h-10 rounded-xl px-4 text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6] bg-white">
-                <Plus className="w-4 h-4 mr-2" /> Add Column
-             </Button>
-          </div>
+            </div>
+
+            <div
+              className={cn(
+                "fixed bottom-10 left-1/2 -translate-x-1/2 w-64 h-24 transition-all duration-300 z-50",
+                isDraggingTodo ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-10 pointer-events-none"
+              )}
+            >
+              <Droppable droppableId="todo-trash">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "w-full h-full rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all duration-200 shadow-2xl backdrop-blur-xl",
+                      snapshot.isDraggingOver ? "bg-red-500/90 border-red-500 text-white scale-110" : "bg-white/95 border-red-500 text-red-500 scale-100"
+                    )}
+                  >
+                    <Trash2 className="w-8 h-8 opacity-80" />
+                    <span className="text-sm font-bold uppercase tracking-wider">Drop to Delete</span>
+                    <div className="hidden">{provided.placeholder}</div>
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          </DragDropContext>
         </div>
       )}
 
