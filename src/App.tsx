@@ -109,12 +109,14 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
     if (!linkVal.trim()) return;
     
     let url = linkVal.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    if (url.match(/^[a-zA-Z]:\\/) || url.match(/^[a-zA-Z]:\//)) {
+      url = 'file:///' + url.replace(/\\/g, '/');
+    } else if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://') && !url.startsWith('smb://') && !url.startsWith('\\\\')) {
       url = 'https://' + url;
     }
 
     const newAttachment = {
-      name: url,
+      name: linkVal.trim(),
       url: url,
       type: 'link'
     };
@@ -188,7 +190,28 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
           <div className="grid gap-2">
             {task.attachments.map((att, idx) => (
               <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-[#F2F2F7] border border-transparent group">
-                <a href={att.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 overflow-hidden flex-1 hover:text-[#007AFF] transition-colors">
+                <a 
+                  href={att.url} 
+                  target={att.url.startsWith('file://') || att.url.startsWith('smb://') || att.url.startsWith('\\\\') ? undefined : "_blank"}
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 overflow-hidden flex-1 hover:text-[#007AFF] transition-colors"
+                  onClick={(e) => {
+                    const isLocal = att.url.startsWith('file://') || att.url.startsWith('smb://') || att.url.startsWith('\\\\');
+                    if (isLocal) {
+                      e.preventDefault();
+                      let copyText = att.url;
+                      if (att.url.startsWith('file:///')) {
+                         copyText = att.url.replace('file:///', '').replace(/\//g, '\\');
+                         navigator.clipboard.writeText(copyText);
+                         toast.success('Local file path copied to clipboard! (Browser security blocks opening local files directly)');
+                      } else {
+                         navigator.clipboard.writeText(att.url);
+                         toast.success('Local file path copied to clipboard!');
+                      }
+                    }
+                  }}
+                  title={att.url}
+                >
                    {att.type === 'link' ? <LinkIcon className="shrink-0 w-3.5 h-3.5 text-[#8E8E93]" /> : <FileIcon className="shrink-0 w-3.5 h-3.5 text-[#8E8E93]" />}
                    <span className="text-xs truncate font-medium text-[#1C1C1E]">{att.name}</span>
                 </a>
