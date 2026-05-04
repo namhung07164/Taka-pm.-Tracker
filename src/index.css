@@ -145,14 +145,23 @@
 .dark .bg-white {
     background-color: #1C1C1E !important;
 }
+.dark .bg-white\/50, .dark .bg-white\/80, .dark .bg-white\/95 {
+    background-color: rgba(28, 28, 30, 0.8) !important;
+}
 .dark .text-\[\#1C1C1E\] {
     color: #F2F2F7 !important;
 }
 .dark .bg-\[\#F2F2F7\] {
     background-color: #000000 !important;
 }
+.dark .bg-\[\#F2F2F7\]\/50, .dark .bg-\[\#F2F2F7\]\/80 {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
 .dark .border-\[\#D1D1D6\] {
     border-color: #38383A !important;
+}
+.dark .border-\[\#D1D1D6\]\/50, .dark .border-\[\#D1D1D6\]\/40, .dark .border-\[\#D1D1D6\]\/30 {
+    border-color: rgba(56, 56, 58, 0.5) !important;
 }
 .dark .text-\[\#000000\] {
     color: #FFFFFF !important;
@@ -165,4 +174,19 @@
 }
 .dark .border-\[\#E5E5EA\] {
     border-color: #2C2C2E !important;
+}
+
+.dark input, .dark textarea {
+    color: #F2F2F7 !important;
+    background-color: #1C1C1E !important;
+}
+
+.dark ::selection {
+    background-color: rgba(10, 132, 255, 0.3);
+    color: #ffffff;
+}
+
+.dark .bg-gray-50, .dark .bg-slate-50 {
+    background-color: #2C2C2E !important;
+    color: #A1A1A6 !important;
 }

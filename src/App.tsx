@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2, Sun, Moon } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2, Sun, Moon, Menu, ChevronsUpDown } from 'lucide-react';
 import { format, isAfter, isBefore, isWithinInterval, startOfDay, parseISO, isValid } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -34,6 +34,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -317,30 +318,30 @@ const getAppBStatusColor = (status: DelegationStatus | undefined | string) => {
     case 'Done': return 'bg-[#34C759] text-white';
     case 'Reject': return 'bg-[#FF3B30] text-white';
     case 'On Process': return 'bg-[#007AFF] text-white';
-    case 'Assigned': return 'bg-white text-amber-600';
+    case 'Assigned': return 'bg-white dark:bg-[#1C1C1E] text-amber-600 dark:text-amber-400';
     case 'Review': return 'bg-purple-500 text-white';
-    default: return 'bg-gray-50 text-gray-600';
+    default: return 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300';
   }
 };
 
 const getTaskCardBg = (status: DelegationStatus | undefined | string) => {
   switch(status) {
-    case 'Done': return 'bg-green-50/50 hover:bg-green-50 border-green-100/50';
-    case 'Reject': return 'bg-red-50/50 hover:bg-red-50 border-red-100/50';
-    case 'On Process': return 'bg-blue-50/50 hover:bg-blue-50 border-blue-100/50';
-    case 'Assigned': return 'bg-amber-50/50 hover:bg-amber-50 border-amber-100/50';
-    case 'Review': return 'bg-purple-50/50 hover:bg-purple-50 border-purple-100/50';
-    default: return 'bg-white hover:bg-[#F9F9F9] border-transparent';
+    case 'Done': return 'bg-green-50/50 dark:bg-green-950/30 hover:bg-green-50 dark:hover:bg-green-900/40 border-green-100/50 dark:border-green-900/50';
+    case 'Reject': return 'bg-red-50/50 dark:bg-red-950/30 hover:bg-red-50 dark:hover:bg-red-900/40 border-red-100/50 dark:border-red-900/50';
+    case 'On Process': return 'bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-50 dark:hover:bg-blue-900/40 border-blue-100/50 dark:border-blue-900/50';
+    case 'Assigned': return 'bg-amber-50/50 dark:bg-amber-950/30 hover:bg-amber-50 dark:hover:bg-amber-900/40 border-amber-100/50 dark:border-amber-900/50';
+    case 'Review': return 'bg-purple-50/50 dark:bg-purple-950/30 hover:bg-purple-50 dark:hover:bg-purple-900/40 border-purple-100/50 dark:border-purple-900/50';
+    default: return 'bg-white dark:bg-[#1C1C1E] hover:bg-[#F9F9F9] dark:hover:bg-[#2C2C2E] border-transparent';
   }
 };
 
 const getPriorityStyling = (priority?: string) => {
   switch(priority?.toLowerCase()) {
-    case 'high': return 'bg-red-50 text-red-600 border-red-200';
-    case 'mid-high': return 'bg-orange-50 text-orange-600 border-orange-200';
-    case 'medium': return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-    case 'low': return 'bg-blue-50 text-blue-600 border-blue-200';
-    default: return 'bg-gray-50 text-gray-400 border-gray-200';
+    case 'high': return 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/40';
+    case 'mid-high': return 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/40';
+    case 'medium': return 'bg-yellow-50 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/40';
+    case 'low': return 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/40';
+    default: return 'bg-gray-50 dark:bg-gray-800 text-gray-400 border-gray-200 dark:border-gray-700';
   }
 };
 
@@ -435,6 +436,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [parentTaskFilter, setParentTaskFilter] = useState<string>('All');
+  const [openParentFilter, setOpenParentFilter] = useState(false);
 
   // Notifications State
   const [notifications, setNotifications] = useState<any[]>(() => {
@@ -559,8 +561,8 @@ export default function App() {
        return;
     }
     
-    // If not found, log them in anyway with this custom name
-    setCurrentAppUser({ id: `custom_${Date.now()}`, displayName: customNameInput.trim() });
+    // If not found, reject login
+    toast.error(t.language === 'vi' ? 'Không tìm thấy người dùng hoặc không có quyền truy cập.' : (t.language === 'ja' ? 'ユーザーが見つからないか、アクセス権がありません。' : 'User not found or unauthorized.'));
   };
 
   const handleSysUserLogin = (sysUser: any) => {
@@ -946,19 +948,54 @@ export default function App() {
       
       {/* iOS Style Header */}
       <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-[#D1D1D6] px-4 py-3 safe-top">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none mb-1">
-              {t.officialCloud}
-            </span>
-            <h1 className="text-xl font-bold tracking-tight text-[#000000]">{t.taskTracker}</h1>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+             <Popover>
+               <PopoverTrigger asChild>
+                 <Button variant="ghost" size="icon" className="text-[#1C1C1E] shrink-0" title="Menu">
+                   <Menu className="w-5 h-5" />
+                 </Button>
+               </PopoverTrigger>
+               <PopoverContent className="w-56 p-2 rounded-2xl shadow-xl border border-[#D1D1D6]/40 bg-white/95 backdrop-blur-xl" align="start">
+                 <div className="px-3 mb-2 pt-1 text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">Menu</div>
+                 <Button 
+                   variant="ghost" 
+                   onClick={() => setMainTab('tasks')} 
+                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'tasks' ? "bg-[#F2F2F7] text-[#007AFF]" : "text-[#1C1C1E] hover:bg-[#F2F2F7]")}
+                 >
+                    <ListChecks className="w-4 h-4 mr-2.5" /> Team Tasks
+                 </Button>
+                 <Button 
+                   variant="ghost" 
+                   onClick={() => setMainTab('workspace')} 
+                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'workspace' ? "bg-[#F2F2F7] text-[#007AFF]" : "text-[#1C1C1E] hover:bg-[#F2F2F7]")}
+                 >
+                    <LayoutDashboard className="w-4 h-4 mr-2.5" /> Workspace
+                 </Button>
+                 {currentAppUser && (currentAppUser.id === 'admin' || currentAppUser?.email === 'namhung07164@gmail.com') && (
+                   <Button 
+                     variant="ghost" 
+                     onClick={() => setMainTab('account')} 
+                     className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'account' ? "bg-[#F2F2F7] text-[#007AFF]" : "text-[#1C1C1E] hover:bg-[#F2F2F7]")}
+                   >
+                      <UserCircle2 className="w-4 h-4 mr-2.5" /> Account Control
+                   </Button>
+                 )}
+               </PopoverContent>
+             </Popover>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest leading-none mb-1">
+                {t.officialCloud}
+              </span>
+              <h1 className="text-xl font-bold tracking-tight text-[#1C1C1E]">{t.taskTracker}</h1>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5 bg-[#F2F2F7] p-1 rounded-lg">
               <button 
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="w-6 h-6 flex items-center justify-center rounded text-sm opacity-50 hover:opacity-100 hover:bg-white/50 transition-all text-[#1C1C1E] dark:text-[#F2F2F7]"
+                className="w-7 h-6 flex items-center justify-center rounded text-[10px] transition-all text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#000000]"
                 title="Toggle Theme"
               >
                 {theme === 'dark' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
@@ -967,17 +1004,17 @@ export default function App() {
             <div className="flex items-center gap-0.5 mr-2 bg-[#F2F2F7] p-1 rounded-lg">
               <button 
                 onClick={() => setLang('en')}
-                className={cn('w-6 h-6 flex items-center justify-center rounded transition-all', lang === 'en' ? 'bg-white shadow text-sm' : 'text-sm opacity-50 hover:opacity-100')}
+                className={cn('w-7 h-6 flex items-center justify-center rounded transition-all text-[10px] font-bold', lang === 'en' ? 'bg-white shadow text-[#1C1C1E]' : 'text-[#8E8E93] hover:text-[#1C1C1E]')}
                 title="English"
               >
-                🇺🇸
+                US
               </button>
               <button 
                 onClick={() => setLang('ja')}
-                className={cn('w-6 h-6 flex items-center justify-center rounded transition-all', lang === 'ja' ? 'bg-white shadow text-sm' : 'text-sm opacity-50 hover:opacity-100')}
+                className={cn('w-7 h-6 flex items-center justify-center rounded transition-all text-[10px] font-bold', lang === 'ja' ? 'bg-white shadow text-[#1C1C1E]' : 'text-[#8E8E93] hover:text-[#1C1C1E]')}
                 title="Japanese"
               >
-                🇯🇵
+                JP
               </button>
             </div>
             {!currentAppUser ? (
@@ -1030,7 +1067,7 @@ export default function App() {
                               {[...notifications].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((notif) => (
                                 <div 
                                   key={notif.id} 
-                                  className={`px-4 py-3 border-b border-[#D1D1D6]/30 last:border-0 hover:bg-[#F2F2F7]/50 transition-colors cursor-pointer ${!notif.isRead ? 'bg-blue-50/30' : ''}`}
+                                  className={`px-4 py-3 border-b border-[#D1D1D6]/30 last:border-0 hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E] transition-colors cursor-pointer ${!notif.isRead ? 'bg-blue-50/30 dark:bg-blue-500/20' : ''}`}
                                   onClick={() => {
                                     if (notif.taskId) setSelectedTaskId(notif.taskId);
                                     setShowNotifications(false);
@@ -1103,46 +1140,7 @@ export default function App() {
           </main>
         ) : (
           <>
-            {/* Desktop Left Sidebar Tabs */}
-            <aside className="hidden md:block w-56 shrink-0 space-y-6 pt-2">
-               <div className="sticky top-24 space-y-1">
-                 <div className="px-3 mb-4 text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">Menu</div>
-                 <Button 
-                   variant="ghost" 
-                   onClick={() => setMainTab('tasks')} 
-                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'tasks' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
-                 >
-                    <ListChecks className="w-4 h-4 mr-2.5" /> Team Tasks
-                 </Button>
-                 <Button 
-                   variant="ghost" 
-                   onClick={() => setMainTab('workspace')} 
-                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'workspace' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
-                 >
-                    <LayoutDashboard className="w-4 h-4 mr-2.5" /> Workspace
-                 </Button>
-                 {(currentAppUser.id === 'admin' || currentAppUser?.email === 'namhung07164@gmail.com') && (
-                   <Button 
-                     variant="ghost" 
-                     onClick={() => setMainTab('account')} 
-                     className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'account' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
-                   >
-                      <UserCircle2 className="w-4 h-4 mr-2.5" /> Account Control
-                   </Button>
-                 )}
-               </div>
-            </aside>
-            
             <main className="flex-1 w-full space-y-8 pb-24 min-w-0">
-               {/* Mobile Top Tabs */}
-               <div className="md:hidden flex overflow-x-auto no-scrollbar gap-2 mb-4 bg-white/50 p-1.5 rounded-2xl items-center sticky top-20 z-20 backdrop-blur-xl border border-[#D1D1D6]/40">
-                  <Button size="sm" variant="ghost" onClick={() => setMainTab('tasks')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'tasks' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Tasks</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setMainTab('workspace')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'workspace' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Workspace</Button>
-                  {(currentAppUser.id === 'admin' || currentAppUser?.email === 'namhung07164@gmail.com') && (
-                    <Button size="sm" variant="ghost" onClick={() => setMainTab('account')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'account' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Admin</Button>
-                  )}
-               </div>
-
                {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} />}
                
                {mainTab === 'workspace' && <PersonalWorkspace />}
@@ -1152,13 +1150,25 @@ export default function App() {
                    {/* iOS Style Stats Scroll */}
                    <section className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar items-stretch">
               {[
-                { label: t.assignedToMe, value: stats['Assigned'], color: 'bg-white text-amber-600', icon: Clock },
-                { label: t.inProgress, value: stats['On Process'], color: 'bg-[#007AFF] text-white', icon: Clock },
-                { label: t.waitingApproval, value: stats['Review'], color: 'bg-purple-500 text-white', icon: AlertCircle },
-                { label: t.completed, value: stats['Done'], color: 'bg-[#34C759] text-white', icon: CheckCircle2 },
-                { label: t.needsRework, value: stats['Reject'], color: 'bg-[#FF3B30] text-white', icon: AlertCircle },
+                { label: t.allTasks, value: filteredTasks.length, color: 'bg-[#1C1C1E] text-white dark:bg-gray-800 dark:text-gray-100', icon: LayoutDashboard, filterVal: 'All' },
+                { label: t.assignedToMe, value: stats['Assigned'], color: 'bg-white text-amber-600 dark:bg-[#1C1C1E] dark:text-amber-400', icon: Clock, filterVal: 'Assigned' },
+                { label: t.inProgress, value: stats['On Process'], color: 'bg-[#007AFF] text-white', icon: Clock, filterVal: 'On Process' },
+                { label: t.waitingApproval, value: stats['Review'], color: 'bg-purple-500 text-white', icon: AlertCircle, filterVal: 'Review' },
+                { label: t.completed, value: stats['Done'], color: 'bg-[#34C759] text-white', icon: CheckCircle2, filterVal: 'Done' },
+                { label: t.needsRework, value: stats['Reject'], color: 'bg-[#FF3B30] text-white', icon: AlertCircle, filterVal: 'Reject' },
               ].map((stat) => (
-                <div key={stat.label} className={cn("flex-shrink-0 w-32 p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/30", stat.color)}>
+                <div 
+                  key={stat.label} 
+                  onClick={() => {
+                    setStatusFilter(stat.filterVal);
+                    setSelectedTaskId(null);
+                  }}
+                  className={cn(
+                    "flex-shrink-0 w-32 p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/30 cursor-pointer transition-all active:scale-95", 
+                    stat.color,
+                    statusFilter === stat.filterVal ? "ring-2 ring-offset-2 ring-[#007AFF] dark:ring-offset-[#000000]" : "opacity-70 hover:opacity-100"
+                  )}
+                >
                   <stat.icon className="w-5 h-5 mb-3 opacity-80" />
                   <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">{stat.label}</p>
                   <h3 className="text-2xl font-bold mt-0.5 tracking-tight">{stat.value}</h3>
@@ -1177,7 +1187,7 @@ export default function App() {
                          }}
                          className={cn(
                            "text-[9px] uppercase font-bold text-left px-2 py-1.5 rounded-lg transition-colors leading-none",
-                           priorityFilter === prio ? "bg-blue-50 text-blue-600" : "text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E]"
+                           priorityFilter === prio ? "bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400" : "text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1C1C1E] dark:hover:bg-[#2C2C2E] dark:hover:text-[#F2F2F7]"
                          )}
                        >
                          {prio}
@@ -1187,56 +1197,53 @@ export default function App() {
               </div>
             </section>
 
-            {/* Filter */}
-            <section className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-              {['All', 'Assigned', 'On Process', 'Review', 'Done', 'Reject'].map((filterVal) => {
-                const displayMap: any = {
-                  'All': t.allTasks,
-                  'Assigned': t.assignedToMe,
-                  'On Process': t.inProgress,
-                  'Review': t.waitingApproval,
-                  'Done': t.completed,
-                  'Reject': t.needsRework
-                };
-                return (
-                  <Button 
-                    key={filterVal}
+            {/* Parent Task Combobox Filter */}
+            <section className="pb-4 relative">
+              <Popover open={openParentFilter} onOpenChange={setOpenParentFilter}>
+                <PopoverTrigger asChild>
+                  <Button
                     variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setStatusFilter(filterVal);
-                      setSelectedTaskId(null);
-                    }}
-                    className={cn(
-                      "rounded-full text-xs font-semibold px-4 h-8 border-[#D1D1D6]", 
-                      statusFilter === filterVal ? "bg-[#1C1C1E] text-white border-transparent" : "bg-white text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-[#F2F2F7]"
-                    )}
+                    role="combobox"
+                    aria-expanded={openParentFilter}
+                    className="w-full h-11 justify-between rounded-2xl border border-[#D1D1D6]/80 dark:border-[#38383A] bg-white dark:bg-[#1C1C1E] text-[13px] font-semibold text-[#1C1C1E] dark:text-[#F2F2F7] hover:bg-gray-50 dark:hover:bg-[#2C2C2E]"
                   >
-                    {displayMap[filterVal]}
+                    {parentTaskFilter === 'All' ? t.allProjectsGroups : parentTaskFilter}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-[#8E8E93]" />
                   </Button>
-                );
-              })}
-            </section>
-
-            {/* Parent Task Filter */}
-            <section className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar">
-              {['All', ...Array.from(new Set(filteredTasks.map(t => t.parentTask || 'Others')))].map((pTask) => (
-                <Button 
-                  key={pTask}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setParentTaskFilter(pTask);
-                    setSelectedTaskId(null);
-                  }}
-                  className={cn(
-                    "rounded-xl text-[10px] sm:text-xs font-semibold px-3 h-7 sm:h-8 border-[#D1D1D6]/50 whitespace-nowrap", 
-                    parentTaskFilter === pTask ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-[#F2F2F7]/50 text-[#8E8E93] hover:text-[#1C1C1E] hover:bg-[#E5E5EA]"
-                  )}
-                >
-                  {pTask === 'All' ? t.allProjectsGroups : pTask}
-                </Button>
-              ))}
+                </PopoverTrigger>
+                <PopoverContent className="w-[calc(100vw-32px)] sm:w-[400px] p-0 rounded-2xl shadow-xl border-[#D1D1D6]/50 dark:border-[#38383A]">
+                  <Command>
+                    <CommandInput placeholder="Search..." className="h-11 dark:text-[#F2F2F7]" />
+                    <CommandList className="max-h-[300px]">
+                      <CommandEmpty>No project/group found.</CommandEmpty>
+                      <CommandGroup>
+                        {['All', ...Array.from(new Set(filteredTasks.map(t => t.parentTask || 'Others')))].map((pTask) => (
+                          <CommandItem
+                            key={pTask}
+                            value={pTask === 'All' ? t.allProjectsGroups : pTask}
+                            onSelect={(currentValue) => {
+                              // Shadcn Command lowercases the value by default, so we match against the lowercased option
+                              const actualValue = pTask;
+                              setParentTaskFilter(actualValue);
+                              setSelectedTaskId(null);
+                              setOpenParentFilter(false);
+                            }}
+                            className="text-[13px] font-medium"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                parentTaskFilter === pTask ? "opacity-100 text-[#007AFF]" : "opacity-0"
+                              )}
+                            />
+                            {pTask === 'All' ? t.allProjectsGroups : pTask}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </section>
 
             {/* Task List Section */}
@@ -1245,7 +1252,7 @@ export default function App() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-bold text-[#1C1C1E]">{t.taskList}</h2>
                   {selectedTaskId && (
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedTaskId(null)} className="h-6 px-2 text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-full">
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedTaskId(null)} className="h-6 px-2 text-[10px] bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/20 dark:text-blue-400 dark:hover:bg-blue-500/30 rounded-full">
                       {t.clearSelection}
                     </Button>
                   )}
@@ -1293,7 +1300,7 @@ export default function App() {
                              <div className="min-w-0 flex-1">
                               <h3 className="font-bold text-[#1C1C1E] text-base truncate">{group.parentTask}</h3>
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] font-bold text-[#007AFF] bg-blue-100/50 px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
+                                <span className="text-[10px] font-bold text-[#007AFF] bg-blue-100/50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded uppercase tracking-wider flex items-center gap-1">
                                   {group.projectCode}
                                   {group.projectName ? ` - ${group.projectName}` : ''}
                                 </span>
@@ -1428,17 +1435,17 @@ export default function App() {
                                             )}
                                             
                                             {(task.delegationStatus === 'On Process' || task.delegationStatus === 'Reject') && (
-                                              <Button className="w-full justify-start h-10 rounded-xl text-[13px] font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50" variant="ghost" onClick={() => handleActionUpdate(task.id, 'Review')}>
+                                              <Button className="w-full justify-start h-10 rounded-xl text-[13px] font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/20" variant="ghost" onClick={() => handleActionUpdate(task.id, 'Review')}>
                                                 📤 {t.requestReview}
                                               </Button>
                                             )}
                                             
                                             {task.delegationStatus === 'Review' && (
-                                               <p className="text-xs text-center text-gray-500 py-3 mt-1 bg-gray-50 rounded-xl">{t.waitingApprovalNote}</p>
+                                               <p className="text-xs text-center text-gray-500 dark:text-gray-400 py-3 mt-1 bg-gray-50 dark:bg-gray-800 rounded-xl">{t.waitingApprovalNote}</p>
                                             )}
 
                                             {task.delegationStatus === 'Done' && (
-                                               <p className="text-xs text-center text-green-600 font-medium py-3 mt-1 bg-green-50 rounded-xl">{t.taskCompletedNote}</p>
+                                               <p className="text-xs text-center text-green-600 dark:text-green-400 font-medium py-3 mt-1 bg-green-50 dark:bg-green-950/30 rounded-xl">{t.taskCompletedNote}</p>
                                             )}
                                         </PopoverContent>
                                       </Popover>
@@ -1448,7 +1455,7 @@ export default function App() {
                                   <div className="flex-1 w-full">
                                     <Popover>
                                       <PopoverTrigger asChild>
-                                        <Button variant="ghost" className="h-auto min-h-[44px] py-2.5 w-full justify-start text-[11px] sm:text-xs font-semibold rounded-2xl bg-[#F2F2F7] px-3 border border-transparent hover:bg-[#E5E5EA] active:scale-95 transition-all text-left">
+                                        <Button variant="ghost" className="h-auto min-h-[44px] py-2.5 w-full justify-start text-[11px] sm:text-xs font-semibold rounded-2xl bg-[#F2F2F7] dark:bg-[#1C1C1E] px-3 border border-transparent hover:bg-[#E5E5EA] dark:hover:bg-[#2C2C2E] active:scale-95 transition-all text-left dark:text-gray-300">
                                           <MessageSquare className="w-4 h-4 mr-2.5 opacity-70 shrink-0 mt-0.5" />
                                           <span className="whitespace-pre-wrap break-words text-left leading-relaxed">{task.report || t.tapToWriteReport}</span>
                                         </Button>

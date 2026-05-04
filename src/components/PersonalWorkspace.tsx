@@ -10,13 +10,13 @@ import { v4 as uuidv4 } from 'uuid';
 type BoardColor = 'gray' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange';
 
 const BOARD_COLORS: Record<BoardColor, { headerText: string, headerBg: string, bg: string, border: string }> = {
-  gray: { headerText: 'text-gray-800', headerBg: 'bg-gray-200/50', bg: 'bg-[#F2F2F7]', border: 'border-gray-200' },
-  blue: { headerText: 'text-blue-800', headerBg: 'bg-blue-200/50', bg: 'bg-blue-50/50', border: 'border-blue-100' },
-  green: { headerText: 'text-green-800', headerBg: 'bg-green-200/50', bg: 'bg-green-50/50', border: 'border-green-100' },
-  red: { headerText: 'text-red-800', headerBg: 'bg-red-200/50', bg: 'bg-red-50/50', border: 'border-red-100' },
-  yellow: { headerText: 'text-yellow-800', headerBg: 'bg-yellow-200/50', bg: 'bg-yellow-50/50', border: 'border-yellow-100' },
-  purple: { headerText: 'text-purple-800', headerBg: 'bg-purple-200/50', bg: 'bg-purple-50/50', border: 'border-purple-100' },
-  orange: { headerText: 'text-orange-800', headerBg: 'bg-orange-200/50', bg: 'bg-orange-50/50', border: 'border-orange-100' },
+  gray: { headerText: 'text-gray-800 dark:text-gray-200', headerBg: 'bg-gray-200/50 dark:bg-gray-800/50', bg: 'bg-[#F2F2F7] dark:bg-[#1C1C1E]', border: 'border-gray-200 dark:border-gray-700' },
+  blue: { headerText: 'text-blue-800 dark:text-blue-200', headerBg: 'bg-blue-200/50 dark:bg-blue-900/50', bg: 'bg-blue-50/50 dark:bg-blue-950/30', border: 'border-blue-100 dark:border-blue-900/50' },
+  green: { headerText: 'text-green-800 dark:text-green-200', headerBg: 'bg-green-200/50 dark:bg-green-900/50', bg: 'bg-green-50/50 dark:bg-green-950/30', border: 'border-green-100 dark:border-green-900/50' },
+  red: { headerText: 'text-red-800 dark:text-red-200', headerBg: 'bg-red-200/50 dark:bg-red-900/50', bg: 'bg-red-50/50 dark:bg-red-950/30', border: 'border-red-100 dark:border-red-900/50' },
+  yellow: { headerText: 'text-yellow-800 dark:text-yellow-200', headerBg: 'bg-yellow-200/50 dark:bg-yellow-900/50', bg: 'bg-yellow-50/50 dark:bg-yellow-950/30', border: 'border-yellow-100 dark:border-yellow-900/50' },
+  purple: { headerText: 'text-purple-800 dark:text-purple-200', headerBg: 'bg-purple-200/50 dark:bg-purple-900/50', bg: 'bg-purple-50/50 dark:bg-purple-950/30', border: 'border-purple-100 dark:border-purple-900/50' },
+  orange: { headerText: 'text-orange-800 dark:text-orange-200', headerBg: 'bg-orange-200/50 dark:bg-orange-900/50', bg: 'bg-orange-50/50 dark:bg-orange-950/30', border: 'border-orange-100 dark:border-orange-900/50' },
 };
 
 const COLOR_KEYS = Object.keys(BOARD_COLORS) as BoardColor[];
@@ -420,33 +420,33 @@ export const PersonalWorkspace = () => {
     <div className="py-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-1 mb-6 gap-4">
         <div className="flex items-center gap-3 shrink-0">
-          <h2 className="text-lg font-bold text-[#1C1C1E]">Personal Workspace</h2>
+          <h2 className="text-lg font-bold text-[#1C1C1E] dark:text-[#F2F2F7]">Personal Workspace</h2>
           {view === 'kanban' && (
-            <Button onClick={addColumn} variant="outline" size="sm" className="h-7 w-7 p-0 rounded-full bg-white text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6]">
+            <Button onClick={addColumn} variant="outline" size="sm" className="h-7 w-7 p-0 rounded-full bg-white dark:bg-[#1C1C1E] text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7] border-[#D1D1D6] dark:border-[#38383A]">
               <Plus className="w-4 h-4" />
             </Button>
           )}
         </div>
 
-        <div className="flex bg-[#E5E5EA]/60 p-1 rounded-2xl w-full overflow-x-auto no-scrollbar sm:w-fit shrink-0">
+        <div className="flex bg-[#E5E5EA]/60 dark:bg-[#1C1C1E] p-1 rounded-2xl w-full overflow-x-auto no-scrollbar sm:w-fit shrink-0">
           <Button 
             onClick={() => setView('kanban')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'kanban' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'kanban' ? "bg-white dark:bg-[#2C2C2E] shadow-sm text-[#1C1C1E] dark:text-white" : "text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7]")}
           >
             <KanbanSquare className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> Board
           </Button>
           <Button 
             onClick={() => setView('todo')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'todo' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'todo' ? "bg-white dark:bg-[#2C2C2E] shadow-sm text-[#1C1C1E] dark:text-white" : "text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7]")}
           >
             <CheckSquare className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> Todo Check
           </Button>
           <Button 
             onClick={() => setView('daily')} 
             variant="ghost" 
-            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'daily' ? "bg-white shadow-sm text-[#1C1C1E]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+            className={cn("h-8 rounded-xl px-2 xs:px-3 text-[11px] xs:text-xs font-semibold flex items-center justify-center gap-1.5 xs:gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-fit", view === 'daily' ? "bg-white dark:bg-[#2C2C2E] shadow-sm text-[#1C1C1E] dark:text-white" : "text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7]")}
           >
             <CalendarDays className="w-3.5 h-3.5 xs:w-4 xs:h-4 shrink-0" /> <span className="hidden xs:inline">Daily</span> Planner
           </Button>
@@ -529,14 +529,14 @@ export const PersonalWorkspace = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex justify-between items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
+                                className={`bg-white dark:bg-[#1C1C1E] p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 dark:border-[#38383A] flex justify-between items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
                               >
                                 <div 
-                                  className="pt-1 pr-2 text-[#D1D1D6] hover:text-[#8E8E93] transition-colors"
+                                  className="pt-1 pr-2 text-[#D1D1D6] dark:text-[#5C5C5E] hover:text-[#8E8E93] dark:hover:text-[#F2F2F7] transition-colors"
                                 >
                                   <GripVertical className="w-4 h-4" />
                                 </div>
-                                <p className="text-sm font-medium text-[#1C1C1E] break-words flex-1 pr-2 pt-0.5">{task.content}</p>
+                                <p className="text-sm font-medium text-[#1C1C1E] dark:text-[#F2F2F7] break-words flex-1 pr-2 pt-0.5">{task.content}</p>
                                 <button
                                   onClick={() => handleDeleteTask(col.id, index)}
                                   className="text-[#8E8E93] hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0 pt-0.5"
@@ -688,7 +688,7 @@ export const PersonalWorkspace = () => {
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className={`bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 flex gap-3 items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
+                                    className={`bg-white dark:bg-[#1C1C1E] p-3 sm:p-4 rounded-2xl shadow-sm border border-[#D1D1D6]/40 dark:border-[#38383A] flex gap-3 items-start group select-none active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105 cursor-grabbing' : 'cursor-grab'}`}
                                   >
                                      <div 
                                        className="pt-1 text-[#D1D1D6] hover:text-[#8E8E93] transition-colors"
@@ -710,8 +710,8 @@ export const PersonalWorkspace = () => {
                                            updateTodoColumn(col.id, { todos: newTodos });
                                         }}
                                         className={cn(
-                                           "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] text-sm font-medium leading-tight select-text cursor-text",
-                                           todo.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] opacity-70" : "text-[#1C1C1E]"
+                                            "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] dark:placeholder-[#5C5C5E] text-sm font-medium leading-tight select-text cursor-text",
+                                            todo.checked ? "text-[#8E8E93] dark:text-[#8E8E93] line-through decoration-[#D1D1D6] dark:decoration-[#5C5C5E] opacity-70" : "text-[#1C1C1E] dark:text-[#F2F2F7]"
                                         )}
                                      />
                                      <button
@@ -763,7 +763,7 @@ export const PersonalWorkspace = () => {
               })}
               
               <div className="shrink-0 pt-4">
-                 <Button onClick={addTodoColumn} variant="outline" className="h-10 rounded-xl px-4 text-[#8E8E93] hover:text-[#1C1C1E] border-[#D1D1D6] bg-white">
+                 <Button onClick={addTodoColumn} variant="outline" className="h-10 rounded-xl px-4 text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7] border-[#D1D1D6] dark:border-[#38383A] bg-white dark:bg-[#1C1C1E]">
                     <Plus className="w-4 h-4 mr-2" /> Add Column
                  </Button>
               </div>
@@ -797,31 +797,31 @@ export const PersonalWorkspace = () => {
       )}
 
       {view === 'daily' && (
-        <div className="bg-white rounded-[2rem] border border-[#D1D1D6]/40 p-6 sm:p-10 min-h-[60vh]">
+        <div className="bg-white dark:bg-[#1C1C1E] rounded-[2rem] border border-[#D1D1D6]/40 dark:border-[#38383A] p-6 sm:p-10 min-h-[60vh]">
            <div className="max-w-2xl mx-auto space-y-1">
              {dailyBlocks.map((block, index) => {
                 const blocks = dailyBlocks;
                 const setBlocks = setDailyBlocks;
 
                 return (
-                  <div key={block.id} className="group flex items-start -ml-8 hover:bg-[#F2F2F7]/50 rounded-xl transition-colors">
+                  <div key={block.id} className="group flex items-start -ml-8 hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E]/50 rounded-xl transition-colors">
                     <div className="w-8 flex items-center justify-center pt-2.5 sm:pt-3">
                        <Popover>
                           <PopoverTrigger asChild>
-                            <button className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-[#8E8E93] hover:text-[#1C1C1E] transition-all rounded">
+                            <button className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1 text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7] transition-all rounded">
                                <GripVertical className="w-4 h-4" />
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-48 p-2 rounded-xl" align="start">
+                          <PopoverContent className="w-48 p-2 rounded-xl dark:bg-[#1C1C1E]" align="start">
                              <div className="flex flex-col gap-1">
-                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium" onClick={() => turnIntoHeader(blocks, setBlocks, index)}>
+                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium dark:text-[#F2F2F7] dark:hover:bg-[#2C2C2E] dark:hover:text-white" onClick={() => turnIntoHeader(blocks, setBlocks, index)}>
                                  <Heading1 className="w-3.5 h-3.5 mr-2" /> Turn into Header
                                </Button>
-                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium" onClick={() => turnIntoTodo(blocks, setBlocks, index)}>
+                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium dark:text-[#F2F2F7] dark:hover:bg-[#2C2C2E] dark:hover:text-white" onClick={() => turnIntoTodo(blocks, setBlocks, index)}>
                                  <CheckSquare className="w-3.5 h-3.5 mr-2" /> Turn into Todo
                                </Button>
-                               <div className="h-px bg-[#F2F2F7] my-1" />
-                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => deleteBlock(blocks, setBlocks, index)}>
+                               <div className="h-px bg-[#F2F2F7] dark:bg-[#38383A] my-1" />
+                               <Button variant="ghost" size="sm" className="justify-start h-8 text-xs font-medium text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={() => deleteBlock(blocks, setBlocks, index)}>
                                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
                                </Button>
                              </div>
@@ -834,7 +834,7 @@ export const PersonalWorkspace = () => {
                         <button 
                           aria-label="Toggle todo"
                           onClick={() => handleBlockToggle(blocks, setBlocks, block.id)}
-                          className={cn("mt-2 shrink-0 transition-colors", block.checked ? "text-[#007AFF]" : "text-[#D1D1D6] hover:text-[#8E8E93]")}
+                          className={cn("mt-2 shrink-0 transition-colors", block.checked ? "text-[#007AFF]" : "text-[#D1D1D6] dark:text-[#5C5C5E] hover:text-[#8E8E93]")}
                         >
                           {block.checked ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                         </button>
@@ -847,9 +847,9 @@ export const PersonalWorkspace = () => {
                         onKeyDown={(e) => handleBlockKeyDown(e, blocks, setBlocks, index)}
                         placeholder={block.type === 'header' ? 'Heading...' : 'To-do...'}
                         className={cn(
-                          "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6]",
+                          "w-full bg-transparent border-none focus:outline-none focus:ring-0 px-0 rounded-none placeholder:text-[#D1D1D6] dark:placeholder-[#5C5C5E]",
                           block.type === 'header' ? "text-xl font-bold py-2 mt-2 leading-relaxed" : "text-base py-1.5 font-medium leading-relaxed",
-                          block.type === 'todo' && block.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] opacity-70" : "text-[#1C1C1E]"
+                          block.type === 'todo' && block.checked ? "text-[#8E8E93] line-through decoration-[#D1D1D6] dark:decoration-[#5C5C5E] opacity-70" : "text-[#1C1C1E] dark:text-[#F2F2F7]"
                         )}
                       />
                     </div>

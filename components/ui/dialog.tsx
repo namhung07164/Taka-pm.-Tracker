@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 
@@ -11,50 +9,16 @@ function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
-function DialogTrigger({
-  asChild,
-  children,
-  ...props
-}: DialogPrimitive.Trigger.Props & { asChild?: boolean }) {
-  if (asChild) {
-    return (
-      <DialogPrimitive.Trigger
-        data-slot="dialog-trigger"
-        {...props}
-        render={children as React.ReactElement}
-      />
-    )
-  }
-  return (
-    <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props}>
-      {children}
-    </DialogPrimitive.Trigger>
-  )
+function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
 function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
-function DialogClose({
-  asChild,
-  children,
-  ...props
-}: DialogPrimitive.Close.Props & { asChild?: boolean }) {
-  if (asChild) {
-    return (
-      <DialogPrimitive.Close
-        data-slot="dialog-close"
-        {...props}
-        render={children as React.ReactElement}
-      />
-    )
-  }
-  return (
-    <DialogPrimitive.Close data-slot="dialog-close" {...props}>
-      {children}
-    </DialogPrimitive.Close>
-  )
+function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
 function DialogOverlay({
