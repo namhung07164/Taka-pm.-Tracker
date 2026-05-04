@@ -405,18 +405,7 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [systemUsers, setSystemUsers] = useState<any[]>([]);
   const [masterCustomAccounts, setMasterCustomAccounts] = useState<any[]>([]);
-  const [customAccounts, setCustomAccounts] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('taka_custom_accounts');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('taka_custom_accounts', JSON.stringify(customAccounts));
-  }, [customAccounts]);
+  const [customAccounts, setCustomAccounts] = useState<any[]>([]);
 
   const [currentAppUser, setCurrentAppUser] = useState<any>(() => {
     try {
@@ -681,9 +670,18 @@ export default function App() {
       console.warn("Failed to fetch taka_users from master:", err);
     });
 
+    const subAppUsersRef = collection(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_sub_app_users');
+    const unsubSubAppUsers = onSnapshot(subAppUsersRef, (snapshot) => {
+      const arr = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setCustomAccounts(arr);
+    }, (err) => {
+      console.warn("Failed to fetch taka_sub_app_users:", err);
+    });
+
     return () => {
       unsub();
       unsubMasterAccounts();
+      unsubSubAppUsers();
     };
   }, [isAuthReady, user]);
 
@@ -925,6 +923,26 @@ export default function App() {
   const updateTaskCode = async (id: string, code: string) => {
     // Cannot update code directly for master tasks
     toast.info('Cannot change original task code');
+  };
+
+  const handleAddCustomAccount = async (newAccount: any) => {
+    try {
+      const PARENT_APP_ID = 'taka-projects-app-v1';
+      await setDoc(doc(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_sub_app_users', newAccount.id), newAccount);
+    } catch (e) {
+      console.error(e);
+      handleFirestoreError(e, OperationType.CREATE, 'taka_sub_app_users');
+    }
+  };
+
+  const handleRemoveCustomAccount = async (id: string) => {
+    try {
+      const PARENT_APP_ID = 'taka-projects-app-v1';
+      await deleteDoc(doc(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_sub_app_users', id));
+    } catch (e) {
+      console.error(e);
+      handleFirestoreError(e, OperationType.DELETE, 'taka_sub_app_users');
+    }
   };
 
   const deleteTask = async (id: string) => {
@@ -1227,9 +1245,9 @@ export default function App() {
         ) : (
           <>
             <main className="flex-1 w-full space-y-8 pb-24 min-w-0">
-               {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} systemUsers={systemUsers} masterCustomAccounts={masterCustomAccounts} />}
+               {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} systemUsers={systemUsers} masterCustomAccounts={masterCustomAccounts} onAddAccount={handleAddCustomAccount} onRemoveAccount={handleRemoveCustomAccount} />}
                
-               {mainTab === 'workspace' && <PersonalWorkspace />}
+               {mainTab === 'workspace' && <PersonalWorkspace key={currentAppUser?.id || 'default'} />}
 
                {mainTab === 'tasks' && (
                  <>
@@ -1413,7 +1431,7 @@ export default function App() {
                               <div key={task.id} className={cn("px-5 sm:px-6 py-5 transition-colors group flex flex-col min-w-0", getTaskCardBg(task.delegationStatus))}>
                                 <div className="flex justify-between items-start mb-4 gap-2">
                                   <div className="space-y-1.5 flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 flex-wrap">
                                       <span className="text-[10px] font-bold text-[#8E8E93] bg-[#E5E5EA] px-1.5 py-0.5 rounded uppercase tracking-wider">
                                         {task.code}
                                       </span>
@@ -1432,6 +1450,20 @@ export default function App() {
                                          status === 'Not Update' ? t.notUpdate : 
                                          status /* Upcoming */ }
                                       </Badge>
+                                      {task.originalSub?.status && (
+                                        <Badge 
+                                          variant="secondary"
+                                          className={cn(
+                                            "px-2 py-0 h-4 text-[9px] font-bold uppercase tracking-tighter rounded-full whitespace-nowrap",
+                                            task.originalSub.status === 'Critical Delay' ? "bg-[#990000] text-white hover:bg-[#990000]" :
+                                            task.originalSub.status === 'Delay' ? "bg-red-500 text-white" :
+                                            task.originalSub.status === 'Completed' || task.originalSub.status === 'Approved' ? "bg-green-100 text-green-700" :
+                                            "bg-[#1C1C1E] text-white hover:bg-[#1C1C1E] border-transparent"
+                                          )}
+                                        >
+                                          Act: {task.originalSub.status}
+                                        </Badge>
+                                      )}
                                     </div>
                                     
                                     <div className="flex flex-col xl:flex-row xl:items-center gap-2 xl:gap-4 pt-1.5 align-top">
@@ -1491,23 +1523,6 @@ export default function App() {
                                         </div>
                                       </Button>
                                     </div>
-                                    {task.actionRequest?.status && (
-                                      <div className="flex-1">
-                                        <Button 
-                                          variant="ghost" 
-                                          className={cn(
-                                            "h-auto min-h-[44px] py-1.5 w-full justify-start text-[11px] font-semibold rounded-2xl px-2.5 border border-transparent pointer-events-none",
-                                            getActStatusColor(task.actionRequest.status)
-                                          )}
-                                        >
-                                          <Clock className="w-3.5 h-3.5 mr-2 opacity-70 shrink-0" />
-                                          <div className="flex flex-col items-start leading-tight">
-                                            <span className="text-[9px] opacity-70 uppercase tracking-tighter">Act:Status</span>
-                                            <span className="text-left whitespace-pre-wrap">{task.actionRequest.status}</span>
-                                          </div>
-                                        </Button>
-                                      </div>
-                                    )}
                                     <div className="flex-1">
                                       <Popover>
                                         <PopoverTrigger asChild>

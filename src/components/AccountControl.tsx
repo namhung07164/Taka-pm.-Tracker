@@ -11,36 +11,48 @@ interface AccountControlProps {
   setCustomAccounts: (accounts: any[]) => void;
   systemUsers?: any[];
   masterCustomAccounts?: any[];
+  onAddAccount?: (account: any) => Promise<void> | void;
+  onRemoveAccount?: (id: string) => Promise<void> | void;
 }
 
-export function AccountControl({ customAccounts, setCustomAccounts, systemUsers = [], masterCustomAccounts = [] }: AccountControlProps) {
+export function AccountControl({ customAccounts, setCustomAccounts, systemUsers = [], masterCustomAccounts = [], onAddAccount, onRemoveAccount }: AccountControlProps) {
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
 
   const allMasterUsers = [...systemUsers, ...masterCustomAccounts];
 
-  const handleAddAccount = () => {
+  const handleAddAccount = async () => {
     if (!newName.trim()) {
       toast.error('Name is required');
       return;
     }
     
     const newId = `custom_${Date.now()}`;
-    const newAccount = {
+    const newAccount: any = {
       id: newId,
       displayName: newName.trim(),
-      email: newEmail.trim() || undefined,
       isCustom: true
     };
+    if (newEmail.trim()) {
+      newAccount.email = newEmail.trim();
+    }
     
-    setCustomAccounts([...customAccounts, newAccount]);
+    if (onAddAccount) {
+      await onAddAccount(newAccount);
+    } else {
+      setCustomAccounts([...customAccounts, newAccount]);
+    }
     setNewName('');
     setNewEmail('');
     toast.success('Account added successfully');
   };
 
-  const handleRemoveAccount = (id: string) => {
-    setCustomAccounts(customAccounts.filter(acc => acc.id !== id));
+  const handleRemoveAccount = async (id: string) => {
+    if (onRemoveAccount) {
+        await onRemoveAccount(id);
+    } else {
+        setCustomAccounts(customAccounts.filter(acc => acc.id !== id));
+    }
     toast.success('Account removed');
   };
 
