@@ -111,8 +111,6 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
     let url = linkVal.trim();
     if (url.match(/^[a-zA-Z]:\\/) || url.match(/^[a-zA-Z]:\//)) {
       url = 'file:///' + url.replace(/\\/g, '/');
-    } else if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('file://') && !url.startsWith('smb://') && !url.startsWith('\\\\')) {
-      url = 'https://' + url;
     }
 
     const newAttachment = {
@@ -246,7 +244,7 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
                   className="flex gap-2 items-center overflow-hidden"
                 >
                   <Input 
-                    placeholder="https://..." 
+                    placeholder="Enter link..." 
                     value={linkVal} 
                     onChange={e => setLinkVal(e.target.value)} 
                     className="h-8 text-xs rounded-xl focus-visible:ring-[#007AFF] border-[#D1D1D6]"
