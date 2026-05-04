@@ -529,20 +529,20 @@ export default function App() {
        return;
     }
     
-    const hasTasks = tasks.some(t => {
-      return (t.byParty || '').trim().toLowerCase() === normalizedInput;
+    // Try to find a match in the system users or custom accounts
+    const matchedSystemUser = allSystemUsers.find(u => {
+      const name = (u.displayName || u.name || '').trim().toLowerCase();
+      const email = (u.email || '').trim().toLowerCase();
+      return name === normalizedInput || email === normalizedInput;
     });
-    
-    const existsInSystem = allSystemUsers.some(u => 
-      (u.displayName || u.name || '').trim().toLowerCase() === normalizedInput
-    );
-    
-    if (!hasTasks && !existsInSystem) {
-       toast.error(`Not found any tasks assigned to party: ${customNameInput}.`);
+
+    if (matchedSystemUser) {
+       setCurrentAppUser(matchedSystemUser);
        return;
     }
     
-    setCurrentAppUser({ id: 'custom', displayName: customNameInput.trim() });
+    // If not found, log them in anyway with this custom name
+    setCurrentAppUser({ id: `custom_${Date.now()}`, displayName: customNameInput.trim() });
   };
 
   const handleSysUserLogin = (sysUser: any) => {
@@ -1057,44 +1057,20 @@ export default function App() {
             </div>
             
             <div className="flex flex-col gap-4 w-full max-w-xs mt-6 text-left">
-               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1">{t.selectExisting}</Label>
-               <div className="space-y-2 max-h-64 overflow-y-auto p-2 bg-white rounded-2xl border border-[#D1D1D6] shadow-sm">
-                 {allSystemUsers.length === 0 ? (
-                   <p className="text-sm text-center text-gray-400 py-6">Loading or no users found...</p>
-                 ) : (
-                   allSystemUsers.map(sysUser => (
-                     <Button
-                       key={sysUser.id}
-                       variant="ghost"
-                       className="w-full justify-start font-medium text-sm h-12 rounded-xl hover:bg-blue-50 hover:text-blue-600 border border-transparent"
-                       onClick={() => handleSysUserLogin(sysUser)}
-                     >
-                       <div className="flex flex-col items-start leading-tight text-left">
-                         <span className="truncate w-full">{sysUser.displayName || sysUser.name || sysUser.email || 'Unknown User'}</span>
-                         {sysUser.email && <span className="text-[10px] text-gray-400 font-normal truncate w-full">{sysUser.email}</span>}
-                       </div>
-                     </Button>
-                   ))
-                 )}
-               </div>
-
-               <div className="mt-4 pt-4 border-t border-gray-200">
-                 <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">{t.enterCustomId}</Label>
-                 <div className="flex gap-2">
-                    <Input 
-                      placeholder={t.enterName}
-                      value={customNameInput}
-                      onChange={e => setCustomNameInput(e.target.value)}
-                      className="rounded-xl h-10 border-[#D1D1D6] text-sm"
-                    />
-                    <Button 
-                      onClick={handleCustomLogin} 
-                      className="bg-[#007AFF] text-white rounded-xl h-10 px-4 font-bold active:scale-95 transition-all text-xs"
-                    >
-                      Enter
-                    </Button>
-                 </div>
-               </div>
+               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">{t.enterCustomId}</Label>
+               <Input 
+                 placeholder={t.enterName}
+                 value={customNameInput}
+                 onChange={e => setCustomNameInput(e.target.value)}
+                 onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
+                 className="h-12 rounded-xl border-[#D1D1D6] text-sm"
+               />
+               <Button 
+                 onClick={handleCustomLogin} 
+                 className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white rounded-xl h-12 w-full font-bold active:scale-95 transition-all w-full tracking-wide"
+               >
+                 <LogIn className="w-5 h-5 mr-2" /> Login
+               </Button>
             </div>
           </div>
           </main>
