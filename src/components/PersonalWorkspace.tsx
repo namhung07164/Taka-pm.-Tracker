@@ -120,8 +120,11 @@ export const PersonalWorkspace = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    const savedUser = localStorage.getItem('taka_current_user');
+    const userId = savedUser ? JSON.parse(savedUser).id : 'default';
+
     // Load Kanban
-    const savedV2 = localStorage.getItem('taka_personal_tasks_v2');
+    const savedV2 = localStorage.getItem(`taka_personal_tasks_v2_${userId}`);
     if (savedV2) {
       try {
         setColumns(JSON.parse(savedV2));
@@ -129,7 +132,7 @@ export const PersonalWorkspace = () => {
         setColumns(initialKanbanData);
       }
     } else {
-      const savedV1 = localStorage.getItem('taka_personal_tasks');
+      const savedV1 = localStorage.getItem(`taka_personal_tasks_v1_${userId}`); // Also fetch old version with userId just in case
       if (savedV1) {
         try {
           const oldData: Record<string, any[]> = JSON.parse(savedV1);
@@ -151,7 +154,7 @@ export const PersonalWorkspace = () => {
     }
 
     // Load Todo
-    const savedTodoV2 = localStorage.getItem('taka_personal_todo_v2');
+    const savedTodoV2 = localStorage.getItem(`taka_personal_todo_v2_${userId}`);
     if (savedTodoV2) {
       try { setTodoColumns(JSON.parse(savedTodoV2)); } catch(e) { setTodoColumns(initialTodoColumns); }
     } else {
@@ -159,7 +162,7 @@ export const PersonalWorkspace = () => {
     }
 
     // Load Daily
-    const savedDaily = localStorage.getItem('taka_personal_daily');
+    const savedDaily = localStorage.getItem(`taka_personal_daily_${userId}`);
     if (savedDaily) {
       try { setDailyBlocks(JSON.parse(savedDaily)); } catch(e) {}
     } else {
@@ -171,9 +174,12 @@ export const PersonalWorkspace = () => {
 
   useEffect(() => {
     if (isReady) {
-      localStorage.setItem('taka_personal_tasks_v2', JSON.stringify(columns));
-      localStorage.setItem('taka_personal_todo_v2', JSON.stringify(todoColumns));
-      localStorage.setItem('taka_personal_daily', JSON.stringify(dailyBlocks));
+      const savedUser = localStorage.getItem('taka_current_user');
+      const userId = savedUser ? JSON.parse(savedUser).id : 'default';
+      
+      localStorage.setItem(`taka_personal_tasks_v2_${userId}`, JSON.stringify(columns));
+      localStorage.setItem(`taka_personal_todo_v2_${userId}`, JSON.stringify(todoColumns));
+      localStorage.setItem(`taka_personal_daily_${userId}`, JSON.stringify(dailyBlocks));
     }
   }, [columns, todoColumns, dailyBlocks, isReady]);
 
