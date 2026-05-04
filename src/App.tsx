@@ -395,6 +395,7 @@ export default function App() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [systemUsers, setSystemUsers] = useState<any[]>([]);
+  const [masterCustomAccounts, setMasterCustomAccounts] = useState<any[]>([]);
   const [customAccounts, setCustomAccounts] = useState<any[]>(() => {
     try {
       const saved = localStorage.getItem('taka_custom_accounts');
@@ -411,8 +412,8 @@ export default function App() {
   const [mainTab, setMainTab] = useState<'tasks' | 'workspace' | 'account'>('tasks');
 
   const allSystemUsers = useMemo(() => {
-    return [...systemUsers, ...customAccounts];
-  }, [systemUsers, customAccounts]);
+    return [...systemUsers, ...masterCustomAccounts, ...customAccounts];
+  }, [systemUsers, masterCustomAccounts, customAccounts]);
 
   const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
   const [currentAppUser, setCurrentAppUser] = useState<any>(() => {
@@ -618,7 +619,20 @@ export default function App() {
       console.error("Failed to fetch master users:", err);
     });
 
-    return () => unsub();
+    // Fetch custom accounts from the master app using the exact same path format
+    const PARENT_APP_ID = 'taka-projects-app-v1';
+    const masterCustomAccountsRef = collection(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_custom_accounts');
+    const unsubMasterAccounts = onSnapshot(masterCustomAccountsRef, (snapshot) => {
+      const arr = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
+      setMasterCustomAccounts(arr);
+    }, (err) => {
+      console.warn("Failed to fetch taka_custom_accounts from master:", err);
+    });
+
+    return () => {
+      unsub();
+      unsubMasterAccounts();
+    };
   }, [isAuthReady, user]);
 
   useEffect(() => {
@@ -1141,14 +1155,14 @@ export default function App() {
         ) : (
           <>
             <main className="flex-1 w-full space-y-8 pb-24 min-w-0">
-               {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} />}
+               {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} systemUsers={systemUsers} masterCustomAccounts={masterCustomAccounts} />}
                
                {mainTab === 'workspace' && <PersonalWorkspace />}
 
                {mainTab === 'tasks' && (
                  <>
                    {/* iOS Style Stats Scroll */}
-                   <section className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar items-stretch">
+                   <section className="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 custom-scrollbar items-stretch">
               {[
                 { label: t.allTasks, value: filteredTasks.length, color: 'bg-[#1C1C1E] text-white dark:bg-gray-800 dark:text-gray-100', icon: LayoutDashboard, filterVal: 'All' },
                 { label: t.assignedToMe, value: stats['Assigned'], color: 'bg-white text-amber-600 dark:bg-[#1C1C1E] dark:text-amber-400', icon: Clock, filterVal: 'Assigned' },
@@ -1177,7 +1191,7 @@ export default function App() {
               
               <div className="flex-shrink-0 flex flex-col justify-between ml-2 bg-white rounded-2xl border border-[#D1D1D6]/30 py-2.5 px-3 shadow-sm h-full max-h-[116px]">
                   <p className="text-[9px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5 px-1">{t.priorityFilter}</p>
-                  <div className="flex flex-col gap-1 overflow-y-auto no-scrollbar">
+                  <div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar">
                     {['All', 'High', 'Mid-High', 'Medium', 'Normal', 'Low'].map(prio => (
                        <button 
                          key={prio} 
@@ -1260,7 +1274,7 @@ export default function App() {
                 <span className="text-xs font-medium text-[#8E8E93]">{displayTasks.length} {t.tasksCount}</span>
               </div>
 
-              <div className="flex overflow-x-auto gap-5 snap-x pb-6 no-scrollbar items-start">
+              <div className="flex overflow-x-auto gap-5 snap-x pb-6 custom-scrollbar items-start">
                 <AnimatePresence mode="popLayout">
                   {displayTasks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 w-full text-center space-y-3 bg-white rounded-3xl border border-[#D1D1D6]/50 shrink-0">

@@ -9,11 +9,15 @@ import { toast } from 'sonner';
 interface AccountControlProps {
   customAccounts: any[];
   setCustomAccounts: (accounts: any[]) => void;
+  systemUsers?: any[];
+  masterCustomAccounts?: any[];
 }
 
-export function AccountControl({ customAccounts, setCustomAccounts }: AccountControlProps) {
+export function AccountControl({ customAccounts, setCustomAccounts, systemUsers = [], masterCustomAccounts = [] }: AccountControlProps) {
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+
+  const allMasterUsers = [...systemUsers, ...masterCustomAccounts];
 
   const handleAddAccount = () => {
     if (!newName.trim()) {
@@ -101,6 +105,27 @@ export function AccountControl({ customAccounts, setCustomAccounts }: AccountCon
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div>
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-[#8E8E93] mb-4 mt-8">Taka-PM Users ({allMasterUsers.length})</h3>
+          <p className="text-xs text-[#8E8E93] mb-4">These users are automatically synced from the master app. They can log in to this app.</p>
+          {allMasterUsers.length === 0 ? (
+            <div className="text-center py-10 bg-[#F2F2F7]/30 rounded-2xl border border-dashed border-[#D1D1D6]">
+              <UserCircle2 className="w-8 h-8 text-[#D1D1D6] mx-auto mb-3" />
+              <p className="text-[#8E8E93] text-sm">No users synced from master app yet</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {allMasterUsers.map(account => (
+                <div key={account.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#D1D1D6]/50 shadow-sm transition-all hover:border-[#D1D1D6]">
+                  <div className="flex flex-col overflow-hidden mr-3">
+                     <span className="font-bold text-[#1C1C1E] text-sm truncate">{account.displayName || account.name || 'Unnamed User'}</span>
+                    {account.email && <span className="text-[11px] text-[#8E8E93] truncate">{account.email}</span>}
+                  </div>
                 </div>
               ))}
             </div>

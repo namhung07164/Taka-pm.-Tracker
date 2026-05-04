@@ -428,7 +428,7 @@ export const PersonalWorkspace = () => {
           )}
         </div>
 
-        <div className="flex bg-[#E5E5EA]/60 dark:bg-[#1C1C1E] p-1 rounded-2xl w-full overflow-x-auto no-scrollbar sm:w-fit shrink-0">
+        <div className="flex bg-[#E5E5EA]/60 dark:bg-[#1C1C1E] p-1 rounded-2xl w-full overflow-x-auto custom-scrollbar sm:w-fit shrink-0">
           <Button 
             onClick={() => setView('kanban')} 
             variant="ghost" 
@@ -456,7 +456,7 @@ export const PersonalWorkspace = () => {
       {view === 'kanban' && (
         <div className="relative">
           <DragDropContext onDragStart={onDragStartKanban} onDragEnd={onDragEndKanban}>
-          <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
+          <div className="flex gap-4 overflow-x-auto snap-x pb-6 custom-scrollbar items-start">
             {columns.map((col) => {
               const styles = BOARD_COLORS[col.color];
               
@@ -616,7 +616,7 @@ export const PersonalWorkspace = () => {
       {view === 'todo' && (
         <div className="relative">
           <DragDropContext onDragStart={onDragStartTodo} onDragEnd={onDragEndTodo}>
-            <div className="flex gap-4 overflow-x-auto snap-x pb-6 no-scrollbar items-start">
+            <div className="flex gap-4 overflow-x-auto snap-x pb-6 custom-scrollbar items-start">
               {todoColumns.map((col) => {
                 const styles = BOARD_COLORS[col.color];
                 return (
