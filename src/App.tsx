@@ -541,12 +541,25 @@ export default function App() {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [showAdminPasswordInput, setShowAdminPasswordInput] = useState(false);
+
   const handleCustomLogin = () => {
     if (!customNameInput.trim()) return;
     const normalizedInput = customNameInput.trim().toLowerCase();
     
     if (normalizedInput === 'admin') {
+       if (!showAdminPasswordInput) {
+         setShowAdminPasswordInput(true);
+         return;
+       }
+       if (adminPasswordInput !== 'Taka@2026') {
+         toast.error(t.language === 'vi' ? 'Mật khẩu không đúng.' : (t.language === 'ja' ? 'パスワードが間違っています。' : 'Incorrect password.'));
+         return;
+       }
        setCurrentAppUser({ id: 'admin', displayName: 'Admin' });
+       setShowAdminPasswordInput(false);
+       setAdminPasswordInput('');
        return;
     }
     
@@ -621,12 +634,20 @@ export default function App() {
 
     // Fetch custom accounts from the master app using the exact same path format
     const PARENT_APP_ID = 'taka-projects-app-v1';
-    const masterCustomAccountsRef = collection(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_custom_accounts');
+    const masterCustomAccountsRef = collection(db, 'artifacts', PARENT_APP_ID, 'public', 'data', 'taka_users');
     const unsubMasterAccounts = onSnapshot(masterCustomAccountsRef, (snapshot) => {
-      const arr = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isCustom: true }));
+      const arr = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          displayName: data.username || data.name || data.displayName,
+          isCustom: true 
+        };
+      });
       setMasterCustomAccounts(arr);
     }, (err) => {
-      console.warn("Failed to fetch taka_custom_accounts from master:", err);
+      console.warn("Failed to fetch taka_users from master:", err);
     });
 
     return () => {
@@ -1135,20 +1156,40 @@ export default function App() {
             </div>
             
             <div className="flex flex-col gap-4 w-full max-w-xs mt-6 text-left">
-               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">{t.enterCustomId}</Label>
-               <Input 
-                 placeholder={t.enterName}
-                 value={customNameInput}
-                 onChange={e => setCustomNameInput(e.target.value)}
-                 onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
-                 className="h-12 rounded-xl border-[#D1D1D6] text-sm"
-               />
+               <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1 block mb-2">{showAdminPasswordInput ? 'Enter Admin Password' : t.enterCustomId}</Label>
+               {showAdminPasswordInput ? (
+                 <Input 
+                   type="password"
+                   placeholder="Password"
+                   value={adminPasswordInput}
+                   onChange={e => setAdminPasswordInput(e.target.value)}
+                   onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
+                   className="h-12 rounded-xl border-[#D1D1D6] text-sm"
+                 />
+               ) : (
+                 <Input 
+                   placeholder={t.enterName}
+                   value={customNameInput}
+                   onChange={e => setCustomNameInput(e.target.value)}
+                   onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
+                   className="h-12 rounded-xl border-[#D1D1D6] text-sm"
+                 />
+               )}
                <Button 
                  onClick={handleCustomLogin} 
                  className="bg-[#007AFF] hover:bg-[#007AFF]/90 text-white rounded-xl h-12 w-full font-bold active:scale-95 transition-all w-full tracking-wide"
                >
                  <LogIn className="w-5 h-5 mr-2" /> Login
                </Button>
+               {showAdminPasswordInput && (
+                 <Button 
+                   onClick={() => { setShowAdminPasswordInput(false); setAdminPasswordInput(''); setCustomNameInput(''); }} 
+                   variant="ghost"
+                   className="text-[#8E8E93] hover:text-[#1C1C1E] mt-2"
+                 >
+                   Cancel
+                 </Button>
+               )}
             </div>
           </div>
           </main>

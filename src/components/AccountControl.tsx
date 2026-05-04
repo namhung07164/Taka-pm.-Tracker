@@ -124,7 +124,8 @@ export function AccountControl({ customAccounts, setCustomAccounts, systemUsers 
                 <div key={account.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#D1D1D6]/50 shadow-sm transition-all hover:border-[#D1D1D6]">
                   <div className="flex flex-col overflow-hidden mr-3">
                      <span className="font-bold text-[#1C1C1E] text-sm truncate">{account.displayName || account.name || 'Unnamed User'}</span>
-                    {account.email && <span className="text-[11px] text-[#8E8E93] truncate">{account.email}</span>}
+                    {account.password && <span className="text-[11px] text-[#8E8E93] truncate mt-0.5">Password: ***</span>}
+                    {account.role && <span className="text-[11px] font-medium text-[#007AFF] mt-1 bg-[#007AFF]/10 w-fit px-2 py-0.5 rounded-full">{account.role}</span>}
                   </div>
                 </div>
               ))}
