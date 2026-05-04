@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2 } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2, Sun, Moon } from 'lucide-react';
 import { format, isAfter, isBefore, isWithinInterval, startOfDay, parseISO, isValid } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -359,6 +359,24 @@ import { PersonalWorkspace } from './components/PersonalWorkspace';
 import { AccountControl } from './components/AccountControl';
 
 export default function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('taka_theme');
+      return (saved as 'light' | 'dark') || 'light';
+    } catch (e) {
+      return 'light';
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('taka_theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   const [lang, setLang] = useState<Language>(() => {
     try {
       const saved = localStorage.getItem('taka_lang');
@@ -937,6 +955,15 @@ export default function App() {
           </div>
           
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5 bg-[#F2F2F7] p-1 rounded-lg">
+              <button 
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="w-6 h-6 flex items-center justify-center rounded text-sm opacity-50 hover:opacity-100 hover:bg-white/50 transition-all text-[#1C1C1E] dark:text-[#F2F2F7]"
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+              </button>
+            </div>
             <div className="flex items-center gap-0.5 mr-2 bg-[#F2F2F7] p-1 rounded-lg">
               <button 
                 onClick={() => setLang('en')}

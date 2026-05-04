@@ -141,3 +141,28 @@
     padding-top: env(safe-area-inset-top);
   }
 }
+
+.dark .bg-white {
+    background-color: #1C1C1E !important;
+}
+.dark .text-\[\#1C1C1E\] {
+    color: #F2F2F7 !important;
+}
+.dark .bg-\[\#F2F2F7\] {
+    background-color: #000000 !important;
+}
+.dark .border-\[\#D1D1D6\] {
+    border-color: #38383A !important;
+}
+.dark .text-\[\#000000\] {
+    color: #FFFFFF !important;
+}
+.dark .bg-\[\#E5E5EA\] {
+    background-color: #2C2C2E !important;
+}
+.dark .text-\[\#8E8E93\] {
+    color: #A1A1A6 !important;
+}
+.dark .border-\[\#E5E5EA\] {
+    border-color: #2C2C2E !important;
+}
