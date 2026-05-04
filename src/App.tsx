@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2 } from 'lucide-react';
 import { format, isAfter, isBefore, isWithinInterval, startOfDay, parseISO, isValid } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -356,6 +356,8 @@ const getPriorityWeight = (priority?: string) => {
 
 import { PersonalWorkspace } from './components/PersonalWorkspace';
 
+import { AccountControl } from './components/AccountControl';
+
 export default function App() {
   const [lang, setLang] = useState<Language>(() => {
     try {
@@ -374,6 +376,25 @@ export default function App() {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [systemUsers, setSystemUsers] = useState<any[]>([]);
+  const [customAccounts, setCustomAccounts] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('taka_custom_accounts');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('taka_custom_accounts', JSON.stringify(customAccounts));
+  }, [customAccounts]);
+
+  const [mainTab, setMainTab] = useState<'tasks' | 'workspace' | 'account'>('tasks');
+
+  const allSystemUsers = useMemo(() => {
+    return [...systemUsers, ...customAccounts];
+  }, [systemUsers, customAccounts]);
+
   const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
   const [currentAppUser, setCurrentAppUser] = useState<any>(() => {
     try {
@@ -512,7 +533,11 @@ export default function App() {
       return (t.byParty || '').trim().toLowerCase() === normalizedInput;
     });
     
-    if (!hasTasks) {
+    const existsInSystem = allSystemUsers.some(u => 
+      (u.displayName || u.name || '').trim().toLowerCase() === normalizedInput
+    );
+    
+    if (!hasTasks && !existsInSystem) {
        toast.error(`Not found any tasks assigned to party: ${customNameInput}.`);
        return;
     }
@@ -528,14 +553,6 @@ export default function App() {
        return;
     }
 
-    const hasTasks = tasks.some(t => {
-      return (t.byParty || '').trim().toLowerCase() === userName;
-    });
-    
-    if (!hasTasks) {
-       toast.error(`Not found any tasks assigned to party: ${userName}.`);
-       return;
-    }
     setCurrentAppUser(sysUser);
   };
 
@@ -1027,9 +1044,10 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-8 pb-24">
+      <div className={cn("mx-auto flex flex-col md:flex-row gap-6", currentAppUser ? "max-w-6xl px-4 md:px-8 py-6" : "max-w-4xl px-4 py-6")}>
         {!currentAppUser ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center space-y-6">
+          <main className="w-full space-y-8 pb-24 mx-auto max-w-4xl">
+            <div className="flex flex-col items-center justify-center py-10 text-center space-y-6">
             <div className="p-6 bg-white rounded-full shadow-sm">
               <LogIn className="w-12 h-12 text-[#007AFF]" />
             </div>
@@ -1041,10 +1059,10 @@ export default function App() {
             <div className="flex flex-col gap-4 w-full max-w-xs mt-6 text-left">
                <Label className="text-xs font-bold uppercase tracking-widest text-[#8E8E93] ml-1">{t.selectExisting}</Label>
                <div className="space-y-2 max-h-64 overflow-y-auto p-2 bg-white rounded-2xl border border-[#D1D1D6] shadow-sm">
-                 {systemUsers.length === 0 ? (
+                 {allSystemUsers.length === 0 ? (
                    <p className="text-sm text-center text-gray-400 py-6">Loading or no users found...</p>
                  ) : (
-                   systemUsers.map(sysUser => (
+                   allSystemUsers.map(sysUser => (
                      <Button
                        key={sysUser.id}
                        variant="ghost"
@@ -1079,10 +1097,57 @@ export default function App() {
                </div>
             </div>
           </div>
+          </main>
         ) : (
           <>
-            {/* iOS Style Stats Scroll */}
-            <section className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar items-stretch">
+            {/* Desktop Left Sidebar Tabs */}
+            <aside className="hidden md:block w-56 shrink-0 space-y-6 pt-2">
+               <div className="sticky top-24 space-y-1">
+                 <div className="px-3 mb-4 text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest">Menu</div>
+                 <Button 
+                   variant="ghost" 
+                   onClick={() => setMainTab('tasks')} 
+                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'tasks' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+                 >
+                    <ListChecks className="w-4 h-4 mr-2.5" /> Team Tasks
+                 </Button>
+                 <Button 
+                   variant="ghost" 
+                   onClick={() => setMainTab('workspace')} 
+                   className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'workspace' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+                 >
+                    <LayoutDashboard className="w-4 h-4 mr-2.5" /> Workspace
+                 </Button>
+                 {(currentAppUser.id === 'admin' || currentAppUser?.email === 'namhung07164@gmail.com') && (
+                   <Button 
+                     variant="ghost" 
+                     onClick={() => setMainTab('account')} 
+                     className={cn("w-full justify-start h-10 rounded-xl text-sm font-semibold mb-1", mainTab === 'account' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93] hover:text-[#1C1C1E]")}
+                   >
+                      <UserCircle2 className="w-4 h-4 mr-2.5" /> Account Control
+                   </Button>
+                 )}
+               </div>
+            </aside>
+            
+            <main className="flex-1 w-full space-y-8 pb-24 min-w-0">
+               {/* Mobile Top Tabs */}
+               <div className="md:hidden flex overflow-x-auto no-scrollbar gap-2 mb-4 bg-white/50 p-1.5 rounded-2xl items-center sticky top-20 z-20 backdrop-blur-xl border border-[#D1D1D6]/40">
+                  <Button size="sm" variant="ghost" onClick={() => setMainTab('tasks')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'tasks' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Tasks</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setMainTab('workspace')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'workspace' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Workspace</Button>
+                  {(currentAppUser.id === 'admin' || currentAppUser?.email === 'namhung07164@gmail.com') && (
+                    <Button size="sm" variant="ghost" onClick={() => setMainTab('account')} className={cn("rounded-xl text-xs font-semibold px-4 h-8 shrink-0 flex-1", mainTab === 'account' ? "bg-white shadow-sm text-[#007AFF]" : "text-[#8E8E93]")}>Admin</Button>
+                  )}
+               </div>
+
+               {mainTab === 'account' && <AccountControl customAccounts={customAccounts} setCustomAccounts={setCustomAccounts} />}
+               
+               {mainTab === 'workspace' && <PersonalWorkspace />}
+
+               {mainTab === 'tasks' && (
+                 <>
+                   {/* iOS Style Stats Scroll */}
+                   <section className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar items-stretch">
               {[
                 { label: t.assignedToMe, value: stats['Assigned'], color: 'bg-white text-amber-600', icon: Clock },
                 { label: t.inProgress, value: stats['On Process'], color: 'bg-[#007AFF] text-white', icon: Clock },
@@ -1405,21 +1470,22 @@ export default function App() {
               </div>
             </section>
             
-            {/* Personal Kanban Section */}
-            <PersonalWorkspace />
+                 </>
+               )}
+            </main>
           </>
         )}
+      </div>
 
-        {/* iOS Style Footer */}
-        <footer className="text-center space-y-2 pt-10 opacity-40">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Takashimaya PM • Cloud Tracking</p>
-          <div className="flex justify-center gap-4 text-[9px] font-medium">
-            <span>v1.0.0</span>
-            <span>•</span>
-            <span>iOS Optimized</span>
-          </div>
-        </footer>
-      </main>
+      {/* iOS Style Footer */}
+      <footer className="text-center space-y-2 pt-10 pb-8 opacity-40">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Takashimaya PM • Cloud Tracking</p>
+        <div className="flex justify-center gap-4 text-[9px] font-medium">
+          <span>v1.0.0</span>
+          <span>•</span>
+          <span>iOS Optimized</span>
+        </div>
+      </footer>
     </div>
   );
 }
