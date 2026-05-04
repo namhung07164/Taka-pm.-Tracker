@@ -324,6 +324,15 @@ const getAppBStatusColor = (status: DelegationStatus | undefined | string) => {
   }
 };
 
+const getActStatusColor = (status: RequestStatus | undefined | string) => {
+  switch(status) {
+    case 'Approved': return 'bg-[#34C759] text-white';
+    case 'Rejected': return 'bg-[#FF3B30] text-white';
+    case 'Holding': return 'bg-amber-500 text-white';
+    default: return 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400';
+  }
+};
+
 const getTaskCardBg = (status: DelegationStatus | undefined | string) => {
   switch(status) {
     case 'Done': return 'bg-green-50/50 dark:bg-green-950/30 hover:bg-green-50 dark:hover:bg-green-900/40 border-green-100/50 dark:border-green-900/50';
@@ -409,13 +418,6 @@ export default function App() {
     localStorage.setItem('taka_custom_accounts', JSON.stringify(customAccounts));
   }, [customAccounts]);
 
-  const [mainTab, setMainTab] = useState<'tasks' | 'workspace' | 'account'>('tasks');
-
-  const allSystemUsers = useMemo(() => {
-    return [...systemUsers, ...masterCustomAccounts, ...customAccounts];
-  }, [systemUsers, masterCustomAccounts, customAccounts]);
-
-  const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
   const [currentAppUser, setCurrentAppUser] = useState<any>(() => {
     try {
       const saved = localStorage.getItem('taka_current_user');
@@ -425,11 +427,40 @@ export default function App() {
     }
   });
 
+  const [mainTab, setMainTab] = useState<'tasks' | 'workspace' | 'account'>(() => {
+    try {
+      const savedUser = localStorage.getItem('taka_current_user');
+      const userId = savedUser ? JSON.parse(savedUser).id : 'default';
+      const saved = localStorage.getItem(`taka_mainTab_${userId}`);
+      return (saved as 'tasks' | 'workspace' | 'account') || 'tasks';
+    } catch {
+      return 'tasks';
+    }
+  });
+
+  useEffect(() => {
+    const userId = currentAppUser ? currentAppUser.id : 'default';
+    localStorage.setItem(`taka_mainTab_${userId}`, mainTab);
+  }, [mainTab, currentAppUser]);
+
+  const allSystemUsers = useMemo(() => {
+    return [...systemUsers, ...masterCustomAccounts, ...customAccounts];
+  }, [systemUsers, masterCustomAccounts, customAccounts]);
+
+  const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
+
   useEffect(() => {
     if (currentAppUser) {
       localStorage.setItem('taka_current_user', JSON.stringify(currentAppUser));
+      const savedTab = localStorage.getItem(`taka_mainTab_${currentAppUser.id}`);
+      if (savedTab) {
+         setMainTab(savedTab as 'tasks' | 'workspace' | 'account');
+      } else {
+         setMainTab('tasks');
+      }
     } else {
       localStorage.removeItem('taka_current_user');
+      setMainTab('tasks');
     }
   }, [currentAppUser]);
   const [customNameInput, setCustomNameInput] = useState('');
@@ -1460,6 +1491,23 @@ export default function App() {
                                         </div>
                                       </Button>
                                     </div>
+                                    {task.actionRequest?.status && (
+                                      <div className="flex-1">
+                                        <Button 
+                                          variant="ghost" 
+                                          className={cn(
+                                            "h-auto min-h-[44px] py-1.5 w-full justify-start text-[11px] font-semibold rounded-2xl px-2.5 border border-transparent pointer-events-none",
+                                            getActStatusColor(task.actionRequest.status)
+                                          )}
+                                        >
+                                          <Clock className="w-3.5 h-3.5 mr-2 opacity-70 shrink-0" />
+                                          <div className="flex flex-col items-start leading-tight">
+                                            <span className="text-[9px] opacity-70 uppercase tracking-tighter">Act:Status</span>
+                                            <span className="text-left whitespace-pre-wrap">{task.actionRequest.status}</span>
+                                          </div>
+                                        </Button>
+                                      </div>
+                                    )}
                                     <div className="flex-1">
                                       <Popover>
                                         <PopoverTrigger asChild>

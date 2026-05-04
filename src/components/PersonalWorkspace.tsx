@@ -80,7 +80,26 @@ const initialDailyData: NotionBlock[] = [
 ];
 
 export const PersonalWorkspace = () => {
-  const [view, setView] = useState<'kanban' | 'todo' | 'daily'>('kanban');
+  const [view, setView] = useState<'kanban' | 'todo' | 'daily'>(() => {
+    try {
+      const savedUser = localStorage.getItem('taka_current_user');
+      const userId = savedUser ? JSON.parse(savedUser).id : 'default';
+      const saved = localStorage.getItem(`taka_workspace_view_${userId}`);
+      return (saved as 'kanban' | 'todo' | 'daily') || 'kanban';
+    } catch {
+      return 'kanban';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('taka_current_user');
+      const userId = savedUser ? JSON.parse(savedUser).id : 'default';
+      localStorage.setItem(`taka_workspace_view_${userId}`, view);
+    } catch {
+      // Ignore
+    }
+  }, [view]);
   
   // Kanban State
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
