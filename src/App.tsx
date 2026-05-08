@@ -784,6 +784,7 @@ export default function App() {
               priority: sub.priority || group.priority || sub.Priority || group.Priority || 'Normal',
               byParty: findPartyValue(sub) || findPartyValue(group) || '',
               originalSub: sub,  // Keep a reference to the original subTask 
+              originalGroup: group, // Keep a reference to the group
             });
           });
         }
@@ -1471,18 +1472,26 @@ export default function App() {
                                          status === 'Not Update' ? t.notUpdate : 
                                          status /* Upcoming */ }
                                       </Badge>
-                                      {task.originalSub?.status && (
+                                      {task.originalGroup?.plStatus && (
+                                        <Badge 
+                                          variant="secondary"
+                                          className="px-2 py-0 h-4 text-[9px] font-bold uppercase tracking-tighter rounded-full whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent"
+                                        >
+                                          Pl: {task.originalGroup.plStatus}
+                                        </Badge>
+                                      )}
+                                      {task.originalGroup?.actStatus && (
                                         <Badge 
                                           variant="secondary"
                                           className={cn(
                                             "px-2 py-0 h-4 text-[9px] font-bold uppercase tracking-tighter rounded-full whitespace-nowrap",
-                                            task.originalSub.status === 'Critical Delay' ? "bg-[#990000] text-white hover:bg-[#990000]" :
-                                            task.originalSub.status === 'Delay' ? "bg-red-500 text-white" :
-                                            task.originalSub.status === 'Completed' || task.originalSub.status === 'Approved' ? "bg-green-100 text-green-700" :
-                                            "bg-[#1C1C1E] text-white hover:bg-[#1C1C1E] border-transparent"
+                                            task.originalGroup.actStatus === 'Critical Delay' ? "bg-[#990000] text-white hover:bg-[#990000]" :
+                                            task.originalGroup.actStatus === 'Delay' ? "bg-red-500 text-white hover:bg-red-600" :
+                                            task.originalGroup.actStatus === 'Completed' || task.originalGroup.actStatus === 'Approved' ? "bg-[#34C759] text-white hover:bg-[#2EB84F]" :
+                                            "bg-[#1C1C1E] text-white hover:bg-[#2C2C2E] border-transparent"
                                           )}
                                         >
-                                          Act: {task.originalSub.status}
+                                          Act: {task.originalGroup.actStatus.toUpperCase()}
                                         </Badge>
                                       )}
                                     </div>
