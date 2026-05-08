@@ -1537,8 +1537,8 @@ export default function App() {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row items-stretch pt-2 pb-1 gap-3 w-full">
-                                  <div className="flex flex-1 gap-2">
-                                    <div className="flex-1">
+                                  <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-[160px] shrink-0">
+                                    <div className="flex-1 sm:flex-none">
                                       <Button 
                                         variant="ghost" 
                                         className={cn(
@@ -1553,7 +1553,7 @@ export default function App() {
                                         </div>
                                       </Button>
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 sm:flex-none">
                                       <Popover>
                                         <PopoverTrigger asChild>
                                           <Button variant="outline" className="h-auto min-h-[44px] py-1.5 w-full justify-start text-[11px] font-semibold rounded-2xl px-2.5 border-[#D1D1D6] text-gray-700 bg-white hover:bg-gray-50 focus:ring-0">
@@ -1600,7 +1600,7 @@ export default function App() {
                                     </div>
                                   </div>
 
-                                  <div className="flex-1 w-full">
+                                  <div className="flex-1 w-full min-w-0">
                                     <Popover>
                                       <PopoverTrigger asChild>
                                         <Button variant="ghost" className="h-auto min-h-[44px] py-2.5 w-full justify-start text-[11px] sm:text-xs font-semibold rounded-2xl bg-[#F2F2F7] dark:bg-[#1C1C1E] px-3 border border-transparent hover:bg-[#E5E5EA] dark:hover:bg-[#2C2C2E] active:scale-95 transition-all text-left dark:text-gray-300">
