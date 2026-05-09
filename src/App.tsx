@@ -1025,6 +1025,32 @@ export default function App() {
     }
     
     return [...tasksToDisplay].sort((a, b) => {
+      const getStatusWeight = (status: string | undefined) => {
+        if (status === 'Assigned' || status === 'On Process' || status === 'Reject') return 2;
+        if (status === 'Review') return 1;
+        return 0; // Done
+      };
+
+      const wA = getStatusWeight(a.delegationStatus);
+      const wB = getStatusWeight(b.delegationStatus);
+      
+      if (wA !== wB) {
+        return wB - wA;
+      }
+
+      const getTime = (d: any) => {
+        if (!d) return Infinity;
+        const time = new Date(d).getTime();
+        return isNaN(time) ? Infinity : time;
+      };
+
+      const timeA = getTime(a.finishDate);
+      const timeB = getTime(b.finishDate);
+
+      if (timeA !== timeB) {
+         return timeA - timeB;
+      }
+
       return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
     });
   }, [filteredTasks, statusFilter, priorityFilter, parentTaskFilter, selectedTaskId]);
