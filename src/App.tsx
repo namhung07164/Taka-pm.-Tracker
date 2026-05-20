@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2, Sun, Moon, Menu, ChevronsUpDown } from 'lucide-react';
+import { Plus, Search, Calendar as CalendarIcon, CheckCircle2, Clock, AlertCircle, Trash2, LayoutDashboard, Send, Check, X, MessageSquare, LogIn, LogOut, Paperclip, XCircle, FileIcon, Bell, Link as LinkIcon, ListChecks, UserCircle2, Sun, Moon, Menu, ChevronsUpDown } from 'lucide-react';
 import { format, isAfter, isBefore, isWithinInterval, startOfDay, parseISO, isValid } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -478,6 +478,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [parentTaskFilter, setParentTaskFilter] = useState<string>('All');
+  const [masterSearch, setMasterSearch] = useState<string>('');
   const [openParentFilter, setOpenParentFilter] = useState(false);
 
   // Notifications State
@@ -1024,6 +1025,14 @@ export default function App() {
       tasksToDisplay = tasksToDisplay.filter(t => (t.parentTask || 'Others') === parentTaskFilter);
     }
     
+    if (masterSearch.trim() !== '') {
+      const q = masterSearch.toLowerCase().trim();
+      tasksToDisplay = tasksToDisplay.filter(t => {
+         const searchStr = JSON.stringify(t).toLowerCase();
+         return searchStr.includes(q);
+      });
+    }
+
     return [...tasksToDisplay].sort((a, b) => {
       const getStatusWeight = (status: string | undefined) => {
         if (status === 'Assigned' || status === 'On Process' || status === 'Reject') return 2;
@@ -1053,7 +1062,7 @@ export default function App() {
 
       return getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
     });
-  }, [filteredTasks, statusFilter, priorityFilter, parentTaskFilter, selectedTaskId]);
+  }, [filteredTasks, statusFilter, priorityFilter, parentTaskFilter, selectedTaskId, masterSearch]);
 
   const stats = useMemo(() => {
     const counts = {
@@ -1349,8 +1358,31 @@ export default function App() {
               </div>
             </section>
 
-            {/* Parent Task Combobox Filter */}
-            <section className="pb-4 relative">
+            {/* Filters */}
+            <section className="pb-4 space-y-3 relative">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8E8E93]" />
+                <Input
+                  value={masterSearch}
+                  onChange={(e) => {
+                    setMasterSearch(e.target.value);
+                    setSelectedTaskId(null);
+                  }}
+                  placeholder={t.language === 'vi' ? 'Tìm trong tất cả nội dung...' : (t.language === 'ja' ? 'すべてのコンテンツを検索...' : 'Search all content...')}
+                  className="w-full h-11 pl-10 pr-10 rounded-2xl border-[#D1D1D6]/80 dark:border-[#38383A] bg-white dark:bg-[#1C1C1E] text-[13px] font-semibold focus-visible:ring-[#007AFF]"
+                />
+                {masterSearch && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8E8E93] hover:text-[#1C1C1E] dark:hover:text-[#F2F2F7]"
+                    onClick={() => setMasterSearch('')}
+                  >
+                    <XCircle className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+              
               <Popover open={openParentFilter} onOpenChange={setOpenParentFilter}>
                 <PopoverTrigger asChild>
                   <Button
