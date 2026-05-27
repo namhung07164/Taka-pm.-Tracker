@@ -478,7 +478,10 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [parentTaskFilter, setParentTaskFilter] = useState<string>('All');
-  const [masterSearch, setMasterSearch] = useState<string>('');
+  const [masterSearch, setMasterSearch] = useState<string>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('search') || '';
+  });
   const [openParentFilter, setOpenParentFilter] = useState(false);
 
   // Notifications State
