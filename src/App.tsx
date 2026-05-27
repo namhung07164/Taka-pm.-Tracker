@@ -1026,10 +1026,10 @@ export default function App() {
     }
     
     if (masterSearch.trim() !== '') {
-      const q = masterSearch.toLowerCase().trim();
+      const searchTerms = masterSearch.toLowerCase().trim().split(/\s+/);
       tasksToDisplay = tasksToDisplay.filter(t => {
          const searchStr = JSON.stringify(t).toLowerCase();
-         return searchStr.includes(q);
+         return searchTerms.every(term => searchStr.includes(term));
       });
     }
 
