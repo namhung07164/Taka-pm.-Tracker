@@ -37,4 +37,6 @@ export interface Task {
   priority?: string;
   byParty?: string;
   originalSub?: any;
+  originalGroup?: any;
+  createdBy?: string;
 }

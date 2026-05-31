@@ -457,6 +457,12 @@ export default function App() {
     return [...systemUsers, ...masterCustomAccounts, ...customAccounts];
   }, [systemUsers, masterCustomAccounts, customAccounts]);
 
+  const getCreatorName = (creatorId?: string) => {
+    if (!creatorId) return null;
+    const user = allSystemUsers.find(u => u.uid === creatorId || u.id === creatorId);
+    return user ? (user.displayName || user.name) : null;
+  };
+
   const [projectsMap, setProjectsMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -809,6 +815,7 @@ export default function App() {
               byParty: findPartyValue(sub) || findPartyValue(group) || '',
               originalSub: sub,  // Keep a reference to the original subTask 
               originalGroup: group, // Keep a reference to the group
+              createdBy: group.createdBy || '',
             });
           });
         }
@@ -1530,7 +1537,13 @@ export default function App() {
 
                              {group.tasks[0]?.parentComments && (
                                 <div className="mt-3 sm:mt-0 bg-[#F2F2F7] rounded-xl p-3.5 sm:max-w-md w-full sm:w-auto min-w-0">
-                                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5">{t.groupNote}</div>
+                                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#8E8E93] mb-1.5">
+                                      {(() => {
+                                        const creatorId = group.tasks[0]?.createdBy;
+                                        const creatorName = getCreatorName(creatorId);
+                                        return creatorName ? t.groupNote.replace(/Master|マスター/g, creatorName) : t.groupNote;
+                                      })()}
+                                   </div>
                                    <p className="text-[13px] sm:text-sm font-medium text-[#1C1C1E] whitespace-pre-wrap break-words min-w-0 w-full">{group.tasks[0].parentComments}</p>
                                 </div>
                              )}
