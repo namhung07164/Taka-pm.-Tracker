@@ -767,19 +767,24 @@ export default function App() {
         
         if (Array.isArray(group.subTasks)) {
           group.subTasks.forEach((sub: any) => {
-            let mappedStatus = sub.delegationStatus;
+            let rawStatus = sub.delegationStatus;
             
-            // Migrate old statuses
-            if (!mappedStatus || mappedStatus === 'Pending') {
+            let mappedStatus = rawStatus;
+            if (!rawStatus) {
               mappedStatus = 'Assigned';
-            } else if (mappedStatus === 'In Progress') {
-              mappedStatus = 'On Process';
-            } else if (mappedStatus === 'Pending Completed') {
-              mappedStatus = 'Review';
-            } else if (mappedStatus === 'Completed') {
-              mappedStatus = 'Done';
-            } else if (mappedStatus === 'Rejected') {
-              mappedStatus = 'Reject';
+            } else {
+              const norm = rawStatus.toLowerCase().trim();
+              if (norm === 'pending' || norm === 'assigned') {
+                mappedStatus = 'Assigned';
+              } else if (norm === 'in progress' || norm === 'on process') {
+                mappedStatus = 'On Process';
+              } else if (norm === 'pending completed' || norm === 'review') {
+                mappedStatus = 'Review';
+              } else if (norm === 'completed' || norm === 'done') {
+                mappedStatus = 'Done';
+              } else if (norm === 'rejected' || norm === 'reject') {
+                mappedStatus = 'Reject';
+              }
             }
 
             const start = findDateValue(sub, 'start') || findDateValue(group, 'start');
@@ -903,7 +908,7 @@ export default function App() {
     }
   };
 
-  const handleActionUpdate = async (id: string, actionType: 'Accept' | 'Review') => {
+  const handleActionUpdate = async (id: string, actionType: 'Accept' | 'Review' | 'CancelReview') => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
@@ -926,6 +931,12 @@ export default function App() {
             status: 'Holding',
             timestamp: today.toISOString()
           }
+        };
+      } else if (actionType === 'CancelReview') {
+        updates = {
+          delegationStatus: 'In Progress',
+          siteUpdateDate: formattedToday,
+          actionRequest: null
         };
       }
       
@@ -1678,7 +1689,12 @@ export default function App() {
                                             )}
                                             
                                             {task.delegationStatus === 'Review' && (
-                                               <p className="text-xs text-center text-gray-500 dark:text-gray-400 py-3 mt-1 bg-gray-50 dark:bg-gray-800 rounded-xl">{t.waitingApprovalNote}</p>
+                                               <div className="space-y-2">
+                                                 <p className="text-[11px] text-center text-amber-600 dark:text-amber-500 font-semibold py-2 bg-amber-50 dark:bg-amber-950/30 rounded-xl">{t.waitingApprovalNote}</p>
+                                                 <Button className="w-full justify-start h-10 rounded-xl text-[13px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800" variant="ghost" onClick={() => handleActionUpdate(task.id, 'CancelReview')}>
+                                                   🔙 Cancel Request
+                                                 </Button>
+                                               </div>
                                             )}
 
                                             {task.delegationStatus === 'Done' && (
