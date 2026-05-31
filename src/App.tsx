@@ -908,7 +908,7 @@ export default function App() {
     }
   };
 
-  const handleActionUpdate = async (id: string, actionType: 'Accept' | 'Review' | 'CancelReview') => {
+  const handleActionUpdate = async (id: string, actionType: 'Accept' | 'Review') => {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
     
@@ -931,12 +931,6 @@ export default function App() {
             status: 'Holding',
             timestamp: today.toISOString()
           }
-        };
-      } else if (actionType === 'CancelReview') {
-        updates = {
-          delegationStatus: 'In Progress',
-          siteUpdateDate: formattedToday,
-          actionRequest: null
         };
       }
       
@@ -1689,12 +1683,7 @@ export default function App() {
                                             )}
                                             
                                             {task.delegationStatus === 'Review' && (
-                                               <div className="space-y-2">
-                                                 <p className="text-[11px] text-center text-amber-600 dark:text-amber-500 font-semibold py-2 bg-amber-50 dark:bg-amber-950/30 rounded-xl">{t.waitingApprovalNote}</p>
-                                                 <Button className="w-full justify-start h-10 rounded-xl text-[13px] font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800" variant="ghost" onClick={() => handleActionUpdate(task.id, 'CancelReview')}>
-                                                   🔙 Cancel Request
-                                                 </Button>
-                                               </div>
+                                               <p className="text-xs text-center text-gray-500 dark:text-gray-400 py-3 mt-1 bg-gray-50 dark:bg-gray-800 rounded-xl">{t.waitingApprovalNote}</p>
                                             )}
 
                                             {task.delegationStatus === 'Done' && (
