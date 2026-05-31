@@ -478,6 +478,21 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [priorityFilter, setPriorityFilter] = useState<string>('All');
   const [parentTaskFilter, setParentTaskFilter] = useState<string>('All');
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get('search');
+      if (search) {
+        setMasterSearch(search);
+      }
+    };
+    
+    handleUrlChange();
+    
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
+
   const [masterSearch, setMasterSearch] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('search') || '';
@@ -1031,7 +1046,18 @@ export default function App() {
     if (masterSearch.trim() !== '') {
       const searchTerms = masterSearch.toLowerCase().trim().split(/\s+/);
       tasksToDisplay = tasksToDisplay.filter(t => {
-         const searchStr = JSON.stringify(t).toLowerCase();
+         const searchStr = [
+           t.name,
+           t.parentTask,
+           t.projectCode,
+           t.code,
+           t.location,
+           t.comments,
+           t.originalGroup?.projectName,
+           t.originalGroup?.projectCode,
+           t.originalGroup?.name,
+         ].filter(Boolean).join(' ').toLowerCase();
+         
          return searchTerms.every(term => searchStr.includes(term));
       });
     }
@@ -1565,9 +1591,11 @@ export default function App() {
                                             <path d="M15 13L18 16L15 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                           </svg>
                                         </div>
-                                        <h4 className="font-bold text-[#1C1C1E] text-sm md:text-base break-words">
-                                          {task.name}
-                                        </h4>
+                                        {task.name !== task.parentTask && task.name !== 'Sub-task' && (
+                                          <h4 className="font-bold text-[#1C1C1E] text-sm md:text-base break-words">
+                                            {task.name}
+                                          </h4>
+                                        )}
                                       </div>
                                       
                                       {task.comments && (
