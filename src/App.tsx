@@ -769,16 +769,17 @@ export default function App() {
           group.subTasks.forEach((sub: any) => {
             let mappedStatus = sub.delegationStatus;
             
-            // Normalize statuses
-            if (typeof mappedStatus === 'string') {
-              const norm = mappedStatus.trim().toLowerCase();
-              if (norm === 'pending' || norm === 'assigned') mappedStatus = 'Assigned';
-              else if (norm === 'in progress' || norm === 'on process') mappedStatus = 'On Process';
-              else if (norm === 'pending completed' || norm === 'review') mappedStatus = 'Review';
-              else if (norm === 'completed' || norm === 'done') mappedStatus = 'Done';
-              else if (norm === 'rejected' || norm === 'reject') mappedStatus = 'Reject';
-            } else if (!mappedStatus) {
+            // Migrate old statuses
+            if (!mappedStatus || mappedStatus === 'Pending') {
               mappedStatus = 'Assigned';
+            } else if (mappedStatus === 'In Progress') {
+              mappedStatus = 'On Process';
+            } else if (mappedStatus === 'Pending Completed') {
+              mappedStatus = 'Review';
+            } else if (mappedStatus === 'Completed') {
+              mappedStatus = 'Done';
+            } else if (mappedStatus === 'Rejected') {
+              mappedStatus = 'Reject';
             }
 
             const start = findDateValue(sub, 'start') || findDateValue(group, 'start');
