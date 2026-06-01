@@ -1056,7 +1056,7 @@ export default function App() {
     }
     
     if (masterSearch.trim() !== '') {
-      const searchTerms = masterSearch.toLowerCase().trim().split(/\s+/);
+      const orGroups = masterSearch.toLowerCase().split(/,|\n/).map(g => g.trim()).filter(Boolean);
       tasksToDisplay = tasksToDisplay.filter(t => {
          const searchStr = [
            t.name,
@@ -1068,9 +1068,16 @@ export default function App() {
            t.originalGroup?.projectName,
            t.originalGroup?.projectCode,
            t.originalGroup?.name,
+           t.originalGroup?.parentTaskId,
+           t.originalGroup?.parentTaskName,
+           t.originalSub?.parentTask,
+           t.originalSub?.parentTaskName,
          ].filter(Boolean).join(' ').toLowerCase();
          
-         return searchTerms.every(term => searchStr.includes(term));
+         return orGroups.some(group => {
+            const searchTerms = group.split(/\s+/);
+            return searchTerms.every(term => searchStr.includes(term));
+         });
       });
     }
 
