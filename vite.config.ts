@@ -12,21 +12,21 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+        includeAssets: ['app-icon.svg'],
         manifest: {
-          name: 'Taka Delegation App',
+          name: 'Taka PM',
           short_name: 'Taka',
           description: 'Taka Delegation Sub App',
           theme_color: '#ffffff',
           icons: [
             {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
+              src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=512',
+              sizes: '512x512',
               type: 'image/png'
             },
             {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
+              src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=192',
+              sizes: '192x192',
               type: 'image/png'
             }
           ]

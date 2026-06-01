@@ -230,6 +230,18 @@ const TaskReportEditor = ({ task, onUpdate, disabled }: { task: Task, onUpdate: 
               <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isUploading || disabled} className="flex-1 text-xs rounded-xl h-8 text-[#8E8E93] border-[#D1D1D6] hover:text-[#1C1C1E] hover:bg-[#F2F2F7] active:scale-95 transition-all">
                  {isUploading ? <span className="animate-pulse">Uploading...</span> : <><Paperclip className="w-3.5 h-3.5 mr-1.5" /> File</>}
               </Button>
+              <Button 
+                variant="default"
+                size="sm" 
+                onClick={() => { 
+                  if(val !== task.report) onUpdate({ report: val }); 
+                  toast.success("Report updated!");
+                }} 
+                disabled={disabled} 
+                className="text-xs rounded-xl h-8 px-3 bg-green-500 hover:bg-green-600 text-white border-transparent active:scale-95 transition-all"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </Button>
               <Button variant="outline" size="sm" onClick={() => setShowLinkInput(!showLinkInput)} disabled={disabled} className="text-xs rounded-xl h-8 px-3 text-[#8E8E93] border-[#D1D1D6] hover:text-[#1C1C1E] hover:bg-[#F2F2F7] active:scale-95 transition-all">
                 <LinkIcon className="w-3.5 h-3.5" />
               </Button>
