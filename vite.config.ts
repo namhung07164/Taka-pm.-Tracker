@@ -4,35 +4,33 @@ import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    plugins: [
-      react(),
-      tailwindcss(),
-      VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['app-icon.svg'],
-        manifest: {
-          name: 'Taka PM',
-          short_name: 'Taka',
-          description: 'Taka Delegation Sub App',
-          theme_color: '#ffffff',
-          icons: [
-            {
-              src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=512',
-              sizes: '512x512',
-              type: 'image/png'
-            },
-            {
-              src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=192',
-              sizes: '192x192',
-              type: 'image/png'
-            }
-          ]
-        }
-      })
-    ],
+    plugins: [react(), tailwindcss(), VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['app-icon.svg'],
+      manifest: {
+        name: 'Taka PM',
+        short_name: 'Taka',
+        description: 'Taka Delegation Sub App',
+        theme_color: '#ffffff',
+        icons: [
+          {
+            src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=512',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'https://ui-avatars.com/api/?name=T&background=0D1117&color=fff&size=192',
+            sizes: '192x192',
+            type: 'image/png'
+          }
+        ]
+      }
+    }), cloudflare()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
