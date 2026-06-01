@@ -1225,7 +1225,7 @@ export default function App() {
               </Button>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-[#8E8E93] mr-2 hidden sm:inline-block">👤 {currentAppUser.displayName || currentAppUser.name || 'Master User'}</span>
+                <span className="text-[11px] sm:text-xs font-medium text-[#8E8E93] mr-1 sm:mr-2 truncate max-w-[80px] sm:max-w-none">👤 {currentAppUser.displayName || currentAppUser.name || 'Master User'}</span>
                 
                 <div className="relative" ref={notificationsRef}>
                   <Button 
